@@ -3296,4 +3296,24 @@ public class BuiltinFunctions {
     public static boolean isSimilarityFunction(FunctionIdentifier fi) {
         return similarityFunctions.contains(fi);
     }
+
+    private static final Map<FunctionIdentifier, STFunctionKind> stFunctions = new HashMap<>();
+
+
+    public enum STFunctionKind {
+        STF
+    }
+
+    static {
+        stFunctions.put(BuiltinFunctions.ST_INTERSECTS, STFunctionKind.STF);
+        stFunctions.put(BuiltinFunctions.ST_OVERLAPS, STFunctionKind.STF);
+        stFunctions.put(BuiltinFunctions.ST_TOUCHES, STFunctionKind.STF);
+        stFunctions.put(BuiltinFunctions.ST_CONTAINS, STFunctionKind.STF);
+        stFunctions.put(BuiltinFunctions.ST_CROSSES, STFunctionKind.STF);
+        stFunctions.put(BuiltinFunctions.ST_WITHIN, STFunctionKind.STF);
+    }
+
+    public static boolean isSTFunction(FunctionIdentifier fi) {
+        return stFunctions.get(fi) != null;
+    }
 }
