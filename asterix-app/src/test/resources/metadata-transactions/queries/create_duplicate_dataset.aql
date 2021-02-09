@@ -1,0 +1,4 @@
+use dataverse custord;
+
+create dataset Customers(CustomerType)
+  primary key cid, name on group1;

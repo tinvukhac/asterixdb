@@ -1,0 +1,10 @@
+/*
+ * Description  : Declare UDF and terminate the statement with a ';'
+ * Expected Res : Success
+ * Date         : Apr 10th 2013
+ */
+
+
+drop dataverse test if exists;
+create dataverse test;
+

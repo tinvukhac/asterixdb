@@ -1381,6 +1381,7 @@ public class BuiltinFunctions {
             new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-polygonize", 1);
 
     public static final FunctionIdentifier ST_MBR = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-mbr", 1);
+    public static final FunctionIdentifier ST_MBR_OFFSET = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-mbr-offset", 2);
 
     // Spatial and temporal type accessors
     public static final FunctionIdentifier ACCESSOR_TEMPORAL_YEAR =
@@ -2216,6 +2217,7 @@ public class BuiltinFunctions {
         addFunction(ST_POLYGONIZE, AGeometryTypeComputer.INSTANCE, true);
 
         addFunction(ST_MBR, ARectangleTypeComputer.INSTANCE, true);
+        addFunction(ST_MBR_OFFSET, AGeometryTypeComputer.INSTANCE, true);
 
         // Binary functions
         addFunction(BINARY_HEX_CONSTRUCTOR, ABinaryTypeComputer.INSTANCE, true);

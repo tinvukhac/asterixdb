@@ -1,0 +1,10 @@
+use dataverse test;
+set import-private-functions 'true';
+
+for $l in subset-collection(['a', 'b', 'c', 'd'], 1, 2)
+return $l
+/*
+output:
+"b"
+"c"
+*/

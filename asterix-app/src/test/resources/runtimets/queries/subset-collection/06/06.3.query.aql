@@ -1,0 +1,10 @@
+use dataverse test;
+set import-private-functions 'true';
+
+for $l in subset-collection([1, 2, 3, 4], 2, 2)
+return $l
+/*
+output:
+3
+4
+*/

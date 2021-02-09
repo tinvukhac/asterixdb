@@ -1,0 +1,4 @@
+use dataverse test;
+
+let $c0 := int8("-20")
+return {"f0": floor($c0), "f1": floor(-1.11),"f2": floor(12.9), "f3": floor(1.11)}

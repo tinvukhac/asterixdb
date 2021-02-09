@@ -1,0 +1,67 @@
+use dataverse tpch;
+
+declare type LineItemType as open {
+  l_orderkey: int32, 
+  l_linenumber: int32
+}
+
+declare type OrderType as open {
+  o_orderkey: int32
+}
+
+declare type CustomerType as open {
+  c_custkey: int32
+}
+
+declare type SupplierType as open {
+  s_suppkey: int32
+}
+
+declare type NationType as open {
+  n_nationkey: int32
+}
+
+declare type RegionType as open {
+  r_regionkey: int32
+}
+
+declare type PartType as open {
+  p_partkey: int32
+}
+
+declare type PartSuppType as open {
+  ps_partkey: int32, 
+  ps_suppkey: int32 
+}
+
+declare nodegroup group1 on nc1, nc2;
+
+set format "edu.uci.ics.asterix.runtime.formats.nontagged.NonTaggedDataFormat";
+
+declare dataset LineItems(LineItemType)
+  primary key l_orderkey, l_linenumber on group1;
+declare dataset Orders(OrderType)
+  primary key o_orderkey on group1;
+declare dataset Customers(CustomerType) 
+  primary key c_custkey on group1;
+declare dataset Suppliers(SupplierType)
+  primary key s_suppkey on group1;
+declare dataset Nations(NationType) 
+  primary key n_nationkey on group1;
+declare dataset Regions(RegionType)
+  primary key r_regionkey on group1;
+declare dataset Parts(PartType)
+  primary key p_partkey on group1;
+declare dataset PartSupp(PartSuppType)
+  primary key ps_partkey, ps_suppkey on group1;  
+
+drop dataset LineItems;
+//drop dataset Orders;
+//drop dataset Customers;
+//drop dataset Suppliers;
+//drop dataset Nations;
+//drop dataset Regions;
+//drop dataset Parts;
+//drop dataset PartSupp;
+
+

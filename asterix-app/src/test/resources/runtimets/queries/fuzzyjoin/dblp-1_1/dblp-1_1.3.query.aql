@@ -1,0 +1,11 @@
+use dataverse fuzzyjoin;
+
+set import-private-functions 'true';
+            //
+            // -- - Stage 1 - --
+            //
+            for $paper in dataset('DBLP')
+            for $token in counthashed-word-tokens($paper.title)
+            group by $tokenGroupped := $token with $paper
+            order by count($paper), $tokenGroupped
+            return $tokenGroupped
