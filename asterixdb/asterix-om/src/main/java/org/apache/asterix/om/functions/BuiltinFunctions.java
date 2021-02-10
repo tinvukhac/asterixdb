@@ -1381,7 +1381,8 @@ public class BuiltinFunctions {
             new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-polygonize", 1);
 
     public static final FunctionIdentifier ST_MBR = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-mbr", 1);
-    public static final FunctionIdentifier ST_MBR_OFFSET = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-mbr-offset", 2);
+    public static final FunctionIdentifier ST_MBR_OFFSET =
+            new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "st-mbr-offset", 2);
 
     // Spatial and temporal type accessors
     public static final FunctionIdentifier ACCESSOR_TEMPORAL_YEAR =
@@ -3298,7 +3299,6 @@ public class BuiltinFunctions {
     }
 
     private static final Map<FunctionIdentifier, STFunctionKind> stFunctions = new HashMap<>();
-
 
     public enum STFunctionKind {
         STF
