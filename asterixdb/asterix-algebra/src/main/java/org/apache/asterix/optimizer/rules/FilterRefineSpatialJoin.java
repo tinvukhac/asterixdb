@@ -112,7 +112,11 @@ public class FilterRefineSpatialJoin implements IAlgebraicRewriteRule {
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT), new MutableObject<>(left),
                 new MutableObject<>(right));
 
-        joinConditionRef.setValue(spatialIntersect);
+        ScalarFunctionCallExpression updatedJoinCondition =
+                new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.AND),
+                        new MutableObject<>(spatialIntersect), new MutableObject<>(STFuncExpr));
+
+        joinConditionRef.setValue(updatedJoinCondition);
 
         return true;
     }

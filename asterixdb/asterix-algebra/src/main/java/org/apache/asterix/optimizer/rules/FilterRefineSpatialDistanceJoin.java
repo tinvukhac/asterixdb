@@ -78,10 +78,7 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
         }
         if (!(
                 funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LT) ||
-                        funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LE) ||
-                        funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.GT) ||
-                        funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.GE) ||
-                        funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.NEQ)
+                        funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LE)
         )
         ) {
             return false;
