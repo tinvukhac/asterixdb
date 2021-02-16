@@ -30,7 +30,7 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.ogc.OGCGeometry;
 
-public class STMBROffsetDescriptor extends AbstractSTGeometryNDescriptor {
+public class STMBROffsetDescriptor extends AbstractSTGeometryDoubleNDescriptor {
 
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +47,7 @@ public class STMBROffsetDescriptor extends AbstractSTGeometryNDescriptor {
     }
 
     @Override
-    protected OGCGeometry evaluateOGCGeometry(OGCGeometry geometry, int n) throws HyracksDataException {
+    protected OGCGeometry evaluateOGCGeometry(OGCGeometry geometry, double n) throws HyracksDataException {
         Envelope env = new Envelope();
         geometry.getEsriGeometry().queryEnvelope(env);
         env.offset(n, n);

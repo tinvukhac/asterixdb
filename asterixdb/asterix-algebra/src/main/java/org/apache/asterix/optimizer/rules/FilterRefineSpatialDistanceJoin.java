@@ -73,13 +73,9 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
         }
 
         AbstractFunctionCallExpression funcExpr = (AbstractFunctionCallExpression) joinCondition;
-        if (BuiltinFunctions.LT.equals(funcExpr.getFunctionIdentifier())) {
-
-        }
-        if (!(
-                funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LT) ||
-                        funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LE)
-        )
+        if (!(funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LT) ||
+              funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.LE) ||
+              funcExpr.getFunctionIdentifier().equals(BuiltinFunctions.EQ))
         ) {
             return false;
         }
@@ -104,33 +100,25 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
 
         LogicalVariable inputVar0;
         LogicalVariable inputVar1;
-        IAlgebricksConstantValue inputVar2;
+        IAlgebricksConstantValue distaceVar;
 
         inputVar0 = ((VariableReferenceExpression) ((ScalarFunctionCallExpression) leftOperatingExpr).getArguments().get(LEFT).getValue()).getVariableReference();
         inputVar1 = ((VariableReferenceExpression) ((ScalarFunctionCallExpression) leftOperatingExpr).getArguments().get(RIGHT).getValue()).getVariableReference();
-        inputVar2 = ((ConstantExpression) rightOperatingExpr).getValue();
+        distaceVar = ((ConstantExpression) rightOperatingExpr).getValue();
 
-        ScalarFunctionCallExpression leftOffset =
+        ScalarFunctionCallExpression enlargedLeft =
                 new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR_OFFSET),
                         new MutableObject<>(new VariableReferenceExpression(inputVar0)),
-                        new MutableObject<>(new ConstantExpression(inputVar2)));
+                        new MutableObject<>(new ConstantExpression(distaceVar)));
 
-        ScalarFunctionCallExpression rightOffset =
-                new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR_OFFSET),
-                        new MutableObject<>(new VariableReferenceExpression(inputVar1)),
-                        new MutableObject<>(new ConstantExpression(inputVar2)));
-
-        ScalarFunctionCallExpression left =
+        ScalarFunctionCallExpression rightMBR =
                 new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR),
-                        new MutableObject<>(leftOffset));
-
-        ScalarFunctionCallExpression right =
-                new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR),
-                        new MutableObject<>(rightOffset));
+                        new MutableObject<>(new VariableReferenceExpression(inputVar1)));
 
         ScalarFunctionCallExpression spatialIntersect = new ScalarFunctionCallExpression(
-                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT), new MutableObject<>(left),
-                new MutableObject<>(right));
+                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT),
+                new MutableObject<>(enlargedLeft),
+                new MutableObject<>(rightMBR));
 
         ScalarFunctionCallExpression stFunc = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_DISTANCE),
@@ -140,7 +128,7 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
         ScalarFunctionCallExpression comparisonExp = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(funcExpr.getFunctionIdentifier()),
                 new MutableObject<>(stFunc),
-                new MutableObject<>(new ConstantExpression(inputVar2)));
+                new MutableObject<>(new ConstantExpression(distaceVar)));
 
         ScalarFunctionCallExpression updatedJoinCondition =
                 new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.AND),
