@@ -606,6 +606,9 @@ public class BuiltinFunctions {
     public static final FunctionIdentifier NULL_WRITER =
             new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "agg-null-writer", 1);
 
+    public static final FunctionIdentifier AGG_MBR = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "agg-mbr", 1);
+
+
     public static final FunctionIdentifier SCALAR_ARRAYAGG =
             new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "arrayagg", 1);
     public static final FunctionIdentifier SCALAR_AVG = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "avg", 1);
@@ -632,6 +635,9 @@ public class BuiltinFunctions {
             new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "skewness", 1);
     public static final FunctionIdentifier SCALAR_KURTOSIS =
             new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "kurtosis", 1);
+
+    public static final FunctionIdentifier SCALAR_MBR_AGGREGATE = new FunctionIdentifier(FunctionConstants.ASTERIX_NS, "mbr-aggregate", 1);
+
 
     // serializable aggregate functions
     public static final FunctionIdentifier SERIAL_AVG =
