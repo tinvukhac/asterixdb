@@ -204,16 +204,16 @@ public class SpatialJoinRule implements IAlgebraicRewriteRule {
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.AND), conditionExprs);
         joinConditionRef.setValue(updatedJoinCondition);
 
-        List<LogicalVariable> keysLeftBranch = new ArrayList<>();
-        keysLeftBranch.add(leftTileIdVar);
-        keysLeftBranch.add(leftInputVar);
-        List<LogicalVariable> keysRightBranch = new ArrayList<>();
-        keysRightBranch.add(rightTileIdVar);
-        keysRightBranch.add(rightInputVar);
-        ISpatialJoinUtilFactory mjcf = new IntersectSpatialJoinUtilFactory();
-        joinOp.setPhysicalOperator(new SpatialJoinPOperator(joinOp.getJoinKind(),
-                AbstractJoinPOperator.JoinPartitioningType.PAIRWISE, keysLeftBranch, keysRightBranch,
-                context.getPhysicalOptimizationConfig().getMaxFramesForJoin(), mjcf));
+//        List<LogicalVariable> keysLeftBranch = new ArrayList<>();
+//        keysLeftBranch.add(leftTileIdVar);
+//        keysLeftBranch.add(leftInputVar);
+//        List<LogicalVariable> keysRightBranch = new ArrayList<>();
+//        keysRightBranch.add(rightTileIdVar);
+//        keysRightBranch.add(rightInputVar);
+//        ISpatialJoinUtilFactory mjcf = new IntersectSpatialJoinUtilFactory();
+//        joinOp.setPhysicalOperator(new SpatialJoinPOperator(joinOp.getJoinKind(),
+//                AbstractJoinPOperator.JoinPartitioningType.PAIRWISE, keysLeftBranch, keysRightBranch,
+//                context.getPhysicalOptimizationConfig().getMaxFramesForJoin(), mjcf));
 
         context.addToDontApplySet(this, op);
         return true;
