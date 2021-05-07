@@ -427,7 +427,6 @@ import org.apache.asterix.runtime.evaluators.functions.SleepDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.SpatialAreaDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.SpatialCellDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.SpatialDistanceDescriptor;
-import org.apache.asterix.runtime.evaluators.functions.SpatialTileDescriptor2;
 import org.apache.asterix.runtime.evaluators.functions.StringConcatDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.StringContainsDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.StringEndsWithDescriptor;
@@ -588,7 +587,6 @@ import org.apache.asterix.runtime.runningaggregates.std.WinMarkFirstMissingRunni
 import org.apache.asterix.runtime.runningaggregates.std.WinPartitionLenRunningAggregateDescriptor;
 import org.apache.asterix.runtime.unnestingfunctions.std.RangeDescriptor;
 import org.apache.asterix.runtime.unnestingfunctions.std.ScanCollectionDescriptor;
-import org.apache.asterix.runtime.unnestingfunctions.std.SpatialAttachDescriptor;
 import org.apache.asterix.runtime.unnestingfunctions.std.SpatialTileDescriptor;
 import org.apache.asterix.runtime.unnestingfunctions.std.SubsetCollectionDescriptor;
 
@@ -642,7 +640,6 @@ public final class FunctionCollection implements IFunctionCollection {
         fc.add(RangeDescriptor.FACTORY);
         fc.add(SubsetCollectionDescriptor.FACTORY);
         fc.add(SpatialTileDescriptor.FACTORY);
-        fc.add(SpatialTileDescriptor2.FACTORY);
 
         // aggregate functions
         fc.add(ListifyAggregateDescriptor.FACTORY);
@@ -1108,7 +1105,6 @@ public final class FunctionCollection implements IFunctionCollection {
         fc.add(LineRectanglePolygonAccessor.FACTORY);
         fc.add(ReferenceTileDescriptor.FACTORY);
         fc.add(GetIntersectionDescriptor.FACTORY);
-        fc.add(SpatialAttachDescriptor.FACTORY);
 
         // full-text function
         fc.add(FullTextContainsFunctionDescriptor.FACTORY);

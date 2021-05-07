@@ -98,7 +98,8 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
         resultStorage.reset();
         try {
             if (unionMbr == null) {
-                // TODO: this might not be the correct way to handle null
+                // This might not be the best way to handle null, although unionMbr will be never null according
+                // to the test in finishPartial
                 unionMbr = new ARectangle(new APoint(0, 0), new APoint(0, 0));
             } else {
                 rectangleSerde.serialize(unionMbr, resultStorage.getDataOutput());

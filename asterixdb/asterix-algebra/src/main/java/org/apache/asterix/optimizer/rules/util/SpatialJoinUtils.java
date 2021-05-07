@@ -29,7 +29,6 @@ import org.apache.asterix.om.base.ABoolean;
 import org.apache.asterix.om.base.AInt64;
 import org.apache.asterix.om.base.APoint;
 import org.apache.asterix.om.base.ARectangle;
-import org.apache.asterix.om.base.AString;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.runtime.operators.joins.spatial.utils.ISpatialJoinUtilFactory;
@@ -155,27 +154,6 @@ public class SpatialJoinUtils {
         sideUnnestOp.getInputs().add(new MutableObject<>(sideOp.getValue()));
         sideOp.setValue(sideUnnestOp);
         context.computeAndSetTypeEnvironmentForOperator(sideUnnestOp);
-
-        return sideVar;
-    }
-
-    private static LogicalVariable injectSpatialAttachAssignOperator(IOptimizationContext context,
-            Mutable<ILogicalOperator> sideOp, LogicalVariable inputVar, String mbrKey) throws AlgebricksException {
-        SourceLocation srcLoc = sideOp.getValue().getSourceLocation();
-        LogicalVariable sideVar = context.newVar();
-        VariableReferenceExpression sideInputVar = new VariableReferenceExpression(inputVar);
-        sideInputVar.setSourceLocation(srcLoc);
-        ScalarFunctionCallExpression funcExpr = new ScalarFunctionCallExpression(
-                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_ATTACH),
-                new MutableObject<>(sideInputVar),
-                new MutableObject<>(new ConstantExpression(new AsterixConstantValue(new AString(mbrKey)))));
-        funcExpr.setSourceLocation(srcLoc);
-        AssignOperator sideAssignOp = new AssignOperator(sideVar, new MutableObject<>(funcExpr));
-        sideAssignOp.setSchema(sideOp.getValue().getSchema());
-        sideAssignOp.setSourceLocation(srcLoc);
-        sideAssignOp.getInputs().add(new MutableObject<>(sideOp.getValue()));
-        sideOp.setValue(sideAssignOp);
-        context.computeAndSetTypeEnvironmentForOperator(sideAssignOp);
 
         return sideVar;
     }
