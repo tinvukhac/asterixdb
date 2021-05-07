@@ -57,7 +57,6 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.AbstractLogi
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.AggregateOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.AssignOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.ExchangeOperator;
-import org.apache.hyracks.algebricks.core.algebra.operators.logical.ForwardOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.InnerJoinOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.ProjectOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.ReplicateOperator;
@@ -70,7 +69,6 @@ import org.apache.hyracks.algebricks.core.algebra.operators.physical.BroadcastEx
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.NestedLoopJoinPOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.OneToOneExchangePOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.ReplicatePOperator;
-import org.apache.hyracks.algebricks.core.algebra.operators.physical.SpatialForwardPOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.StreamProjectPOperator;
 import org.apache.hyracks.algebricks.core.algebra.util.OperatorManipulationUtil;
 import org.apache.hyracks.algebricks.rewriter.rules.EnforceStructuralPropertiesRule;
@@ -507,21 +505,6 @@ public class SpatialJoinUtils {
         context.computeAndSetTypeEnvironmentForOperator(globalAggOperator);
         MutableObject<ILogicalOperator> globalAgg = new MutableObject<>(globalAggOperator);
         return new Pair<>(globalAgg, globalAggResultVars);
-    }
-
-    private static ForwardOperator createForward(String aggResultKey, LogicalVariable aggResultVariable,
-            MutableObject<ILogicalOperator> exchangeOpFromReplicate, MutableObject<ILogicalOperator> globalAggInput,
-            IOptimizationContext context, SourceLocation sourceLoc) throws AlgebricksException {
-        AbstractLogicalExpression aggResultExpression = new VariableReferenceExpression(aggResultVariable, sourceLoc);
-        ForwardOperator forwardOperator = new ForwardOperator(aggResultKey, new MutableObject<>(aggResultExpression));
-        forwardOperator.setSourceLocation(sourceLoc);
-        forwardOperator.setPhysicalOperator(new SpatialForwardPOperator());
-        forwardOperator.getInputs().add(exchangeOpFromReplicate);
-        forwardOperator.getInputs().add(globalAggInput);
-        OperatorManipulationUtil.setOperatorMode(forwardOperator);
-        forwardOperator.recomputeSchema();
-        context.computeAndSetTypeEnvironmentForOperator(forwardOperator);
-        return forwardOperator;
     }
 
     private static Triple<MutableObject<ILogicalOperator>, List<LogicalVariable>, MutableObject<ILogicalOperator>> createDynamicMBRCalculator(

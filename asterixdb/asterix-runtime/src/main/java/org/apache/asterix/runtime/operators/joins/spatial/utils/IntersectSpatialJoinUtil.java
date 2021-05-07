@@ -110,11 +110,6 @@ public class IntersectSpatialJoinUtil implements ISpatialJoinUtil {
         return sl.intersects(rectBuild, rectProbe);
     }
 
-    public boolean compareRectangle(ARectangle rectBuild, ARectangle rectProbe, ARectangle mbr, int tileId, int rows,
-            int columns) {
-        return sl.intersectsAtReferenceTile(rectBuild, rectProbe, mbr, tileId, rows, columns);
-    }
-
     @Override
     public boolean checkToLoadNextProbeTuple(IFrameTupleAccessor buildAccessor, int buildTupleIndex,
             IFrameTupleAccessor probeAccessor, int probeTupleIndex) throws HyracksDataException {
