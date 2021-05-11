@@ -29,20 +29,20 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.ogc.OGCGeometry;
 
-public class STMBROffsetDescriptor extends AbstractSTGeometryDoubleNDescriptor {
+public class STMBREnlargeDescriptor extends AbstractSTGeometryDoubleNDescriptor {
 
     private static final long serialVersionUID = 1L;
 
     public static final IFunctionDescriptorFactory FACTORY = new IFunctionDescriptorFactory() {
         @Override
         public IFunctionDescriptor createFunctionDescriptor() {
-            return new STMBROffsetDescriptor();
+            return new STMBREnlargeDescriptor();
         }
     };
 
     @Override
     public FunctionIdentifier getIdentifier() {
-        return BuiltinFunctions.ST_MBR_OFFSET;
+        return BuiltinFunctions.ST_MBR_ENLARGE;
     }
 
     @Override

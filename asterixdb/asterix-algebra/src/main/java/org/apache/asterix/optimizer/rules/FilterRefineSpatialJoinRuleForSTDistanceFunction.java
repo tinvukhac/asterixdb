@@ -57,7 +57,7 @@ import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
  * Note: st_mbr() computes the mbr of a Geometry, and
  * st_mbr_offset() computes the mbr of a Geometry and extending by the second parameter.
  */
-public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
+public class FilterRefineSpatialJoinRuleForSTDistanceFunction implements IAlgebraicRewriteRule {
 
     private static final int LEFT = 0;
     private static final int RIGHT = 1;
@@ -107,8 +107,7 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
                 (AbstractFunctionCallExpression) inputExprs.get(LEFT).getValue();
         ConstantExpression distanceValExpr = (ConstantExpression) inputExprs.get(RIGHT).getValue();
 
-        if (!distanceFuncCallExpr.getFunctionIdentifier().equals(BuiltinFunctions.ST_DISTANCE)
-                || distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class) == null) {
+        if (!distanceFuncCallExpr.getFunctionIdentifier().equals(BuiltinFunctions.ST_DISTANCE)) {
             return false;
         }
 
@@ -124,7 +123,7 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
         // Enlarge the MBR of the left argument of the refine function (st_distance)
         IAlgebricksConstantValue distanceVar = distanceValExpr.getValue();
         ScalarFunctionCallExpression enlargedLeft = new ScalarFunctionCallExpression(
-                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR_OFFSET), distanceFuncCallLeftArg,
+                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR_ENLARGE), distanceFuncCallLeftArg,
                 new MutableObject<>(new ConstantExpression(distanceVar)));
         // Compute the MBR of the right argument of the refine function (st_distance)
         ScalarFunctionCallExpression rightMBR = new ScalarFunctionCallExpression(
@@ -134,8 +133,10 @@ public class FilterRefineSpatialDistanceJoin implements IAlgebraicRewriteRule {
         ScalarFunctionCallExpression spatialIntersect = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT),
                 new MutableObject<>(enlargedLeft), new MutableObject<>(rightMBR));
-        // Attach the annotation to the spatial_intersect function
-        spatialIntersect.putAnnotation(distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class));
+
+        // Attach the annotation to the spatial_intersect function if it is available
+        if(distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
+            spatialIntersect.putAnnotation(distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class));
 
         // Update join condition with filter and refine function
         ScalarFunctionCallExpression updatedJoinCondition =
