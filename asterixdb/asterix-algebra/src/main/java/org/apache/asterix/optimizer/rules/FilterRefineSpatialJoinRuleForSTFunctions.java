@@ -63,7 +63,7 @@ import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
  * Note: st_mbr($x, $y) computes the mbr of the geometry and returns rectangles to pass it spatial_intersect($x, $y)
  *
  */
-public class FilterRefineSpatialJoin implements IAlgebraicRewriteRule {
+public class FilterRefineSpatialJoinRuleForSTFunctions implements IAlgebraicRewriteRule {
 
     private static final int LEFT = 0;
     private static final int RIGHT = 1;
@@ -93,8 +93,7 @@ public class FilterRefineSpatialJoin implements IAlgebraicRewriteRule {
         }
 
         AbstractFunctionCallExpression stFuncExpr = (AbstractFunctionCallExpression) joinCondition;
-        if ((stFuncExpr.getAnnotation(SpatialJoinAnnotation.class) == null)
-                || !BuiltinFunctions.isSTFilterRefineFunction(stFuncExpr.getFunctionIdentifier())) {
+        if (!BuiltinFunctions.isSTFilterRefineFunction(stFuncExpr.getFunctionIdentifier())) {
             return false;
         }
 
@@ -117,8 +116,9 @@ public class FilterRefineSpatialJoin implements IAlgebraicRewriteRule {
         ScalarFunctionCallExpression spatialIntersect = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT), new MutableObject<>(left),
                 new MutableObject<>(right));
-        // Attach the annotation to the spatial_intersect function
-        spatialIntersect.putAnnotation(stFuncExpr.getAnnotation(SpatialJoinAnnotation.class));
+        // Attach the annotation to the spatial_intersect function if it is available
+        if(stFuncExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
+            spatialIntersect.putAnnotation(stFuncExpr.getAnnotation(SpatialJoinAnnotation.class));
 
         // Update join condition with filter and refine function
         ScalarFunctionCallExpression updatedJoinCondition =

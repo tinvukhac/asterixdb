@@ -45,8 +45,8 @@ import org.apache.asterix.optimizer.rules.ExtractDistinctByExpressionsRule;
 import org.apache.asterix.optimizer.rules.ExtractOrderExpressionsRule;
 import org.apache.asterix.optimizer.rules.ExtractWindowExpressionsRule;
 import org.apache.asterix.optimizer.rules.FeedScanCollectionToUnnest;
-import org.apache.asterix.optimizer.rules.FilterRefineSpatialDistanceJoin;
-import org.apache.asterix.optimizer.rules.FilterRefineSpatialJoin;
+import org.apache.asterix.optimizer.rules.FilterRefineSpatialJoinRuleForSTDistanceFunction;
+import org.apache.asterix.optimizer.rules.FilterRefineSpatialJoinRuleForSTFunctions;
 import org.apache.asterix.optimizer.rules.FindDataSourcesRule;
 import org.apache.asterix.optimizer.rules.FixReplicateOperatorOutputsRule;
 import org.apache.asterix.optimizer.rules.FullTextContainsParameterCheckAndSetRule;
@@ -419,15 +419,10 @@ public final class RuleCollections {
         return prepareForJobGenRewrites;
     }
 
-    public static final List<IAlgebraicRewriteRule> buildSTFilterRefineSpatialJoinCollection() {
+    public static final List<IAlgebraicRewriteRule> buildFilterRefineSpatialJoinRuleCollection() {
         List<IAlgebraicRewriteRule> filterRefineSpatialJoin = new LinkedList<>();
-        filterRefineSpatialJoin.add(new FilterRefineSpatialJoin());
+        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTFunctions());
+        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTDistanceFunction());
         return filterRefineSpatialJoin;
-    }
-
-    public static final List<IAlgebraicRewriteRule> buildSTFilterRefineSpatialDistanceJoinCollection() {
-        List<IAlgebraicRewriteRule> filterRefineSpatialDistanceJoin = new LinkedList<>();
-        filterRefineSpatialDistanceJoin.add(new FilterRefineSpatialDistanceJoin());
-        return filterRefineSpatialDistanceJoin;
     }
 }
