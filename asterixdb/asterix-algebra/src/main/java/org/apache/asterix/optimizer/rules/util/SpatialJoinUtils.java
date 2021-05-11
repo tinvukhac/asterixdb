@@ -31,6 +31,8 @@ import org.apache.asterix.om.base.APoint;
 import org.apache.asterix.om.base.ARectangle;
 import org.apache.asterix.om.constants.AsterixConstantValue;
 import org.apache.asterix.om.functions.BuiltinFunctions;
+import org.apache.asterix.om.types.BuiltinType;
+import org.apache.asterix.om.types.IAType;
 import org.apache.asterix.runtime.operators.joins.spatial.utils.ISpatialJoinUtilFactory;
 import org.apache.asterix.runtime.operators.joins.spatial.utils.IntersectSpatialJoinUtilFactory;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -48,6 +50,7 @@ import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractFunctionCa
 import org.apache.hyracks.algebricks.core.algebra.expressions.AbstractLogicalExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.AggregateFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ConstantExpression;
+import org.apache.hyracks.algebricks.core.algebra.expressions.IVariableTypeEnvironment;
 import org.apache.hyracks.algebricks.core.algebra.expressions.ScalarFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.UnnestingFunctionCallExpression;
 import org.apache.hyracks.algebricks.core.algebra.expressions.VariableReferenceExpression;
@@ -169,6 +172,13 @@ public class SpatialJoinUtils {
         // Left and right arguments of the spatial_intersect function should be either variable or function call.
         if (spatialJoinLeftArg.getExpressionTag() == LogicalExpressionTag.CONSTANT
                 || spatialJoinRightArg.getExpressionTag() == LogicalExpressionTag.CONSTANT) {
+            return;
+        }
+
+        IVariableTypeEnvironment typeEnvironment = op.computeInputTypeEnvironment(context);
+        IAType leftType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinLeftArg, context.getMetadataProvider(), typeEnvironment);
+        IAType rightType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinRightArg, context.getMetadataProvider(), typeEnvironment);
+        if ((leftType != BuiltinType.ARECTANGLE) || (rightType != BuiltinType.ARECTANGLE)) {
             return;
         }
 
