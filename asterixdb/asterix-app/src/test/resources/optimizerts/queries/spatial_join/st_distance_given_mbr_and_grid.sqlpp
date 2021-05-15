@@ -24,21 +24,21 @@ USE test;
 -- Make Park type
 CREATE TYPE ParkType as closed {
     id: int32,
-    geom: rectangle
+    geom: Geometry
 };
 
 -- Make Lake type
 CREATE TYPE LakeType as closed {
     id: int32,
-    geom: rectangle
+    geom: Geometry
 };
 
--- Make Park dataset 
+-- Make Park dataset
 CREATE DATASET ParkSet (ParkType) primary key id;
 
--- Make Lake dataset 
+-- Make Lake dataset
 CREATE DATASET LakeSet (LakeType) primary key id;
 
 -- Run query with spatial partitioning hint
 SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
-WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */ spatial_intersect(ps.geom, ls.geom);
+WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */ st_distance(ps.geom, ls.geom) < 1;

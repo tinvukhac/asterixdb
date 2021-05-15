@@ -117,7 +117,7 @@ public class FilterRefineSpatialJoinRuleForSTFunctions implements IAlgebraicRewr
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT), new MutableObject<>(left),
                 new MutableObject<>(right));
         // Attach the annotation to the spatial_intersect function if it is available
-        if(stFuncExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
+        if (stFuncExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
             spatialIntersect.putAnnotation(stFuncExpr.getAnnotation(SpatialJoinAnnotation.class));
 
         // Update join condition with filter and refine function

@@ -135,7 +135,7 @@ public class FilterRefineSpatialJoinRuleForSTDistanceFunction implements IAlgebr
                 new MutableObject<>(enlargedLeft), new MutableObject<>(rightMBR));
 
         // Attach the annotation to the spatial_intersect function if it is available
-        if(distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
+        if (distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
             spatialIntersect.putAnnotation(distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class));
 
         // Update join condition with filter and refine function
