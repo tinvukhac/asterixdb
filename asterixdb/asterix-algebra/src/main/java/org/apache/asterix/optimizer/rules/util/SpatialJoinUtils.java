@@ -283,6 +283,7 @@ public class SpatialJoinUtils {
             leftJoinOp.setPhysicalOperator(new NestedLoopJoinPOperator(AbstractBinaryJoinOperator.JoinKind.INNER,
                     AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
             MutableObject<ILogicalOperator> leftJoinRef = new MutableObject<>(leftJoinOp);
+            leftJoinOp.recomputeSchema();
             context.computeAndSetTypeEnvironmentForOperator(leftJoinOp);
             leftInputOp.setValue(leftJoinRef.getValue());
 
@@ -294,6 +295,7 @@ public class SpatialJoinUtils {
             rightJoinOp.setPhysicalOperator(new NestedLoopJoinPOperator(AbstractBinaryJoinOperator.JoinKind.INNER,
                     AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
             MutableObject<ILogicalOperator> rightJoinRef = new MutableObject<>(rightJoinOp);
+            rightJoinOp.recomputeSchema();
             context.computeAndSetTypeEnvironmentForOperator(rightJoinOp);
             rightInputOp.setValue(rightJoinRef.getValue());
         }
