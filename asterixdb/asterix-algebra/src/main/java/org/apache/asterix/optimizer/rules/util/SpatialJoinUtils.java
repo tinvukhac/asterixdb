@@ -176,8 +176,10 @@ public class SpatialJoinUtils {
         }
 
         IVariableTypeEnvironment typeEnvironment = op.computeInputTypeEnvironment(context);
-        IAType leftType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinLeftArg, context.getMetadataProvider(), typeEnvironment);
-        IAType rightType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinRightArg, context.getMetadataProvider(), typeEnvironment);
+        IAType leftType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinLeftArg,
+                context.getMetadataProvider(), typeEnvironment);
+        IAType rightType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinRightArg,
+                context.getMetadataProvider(), typeEnvironment);
         if ((leftType != BuiltinType.ARECTANGLE) || (rightType != BuiltinType.ARECTANGLE)) {
             return;
         }
