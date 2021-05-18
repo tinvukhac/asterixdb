@@ -114,8 +114,8 @@ public class FilterRefineSpatialJoinRuleForSTFunctions implements IAlgebraicRewr
 
         // Create filter function (spatial_intersect)
         ScalarFunctionCallExpression spatialIntersect = new ScalarFunctionCallExpression(
-                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT), new MutableObject<>(left),
-                new MutableObject<>(right));
+                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT), new MutableObject<>(left.cloneExpression()),
+                new MutableObject<>(right.cloneExpression()));
         // Attach the annotation to the spatial_intersect function if it is available
         if (stFuncExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
             spatialIntersect.putAnnotation(stFuncExpr.getAnnotation(SpatialJoinAnnotation.class));

@@ -132,7 +132,7 @@ public class FilterRefineSpatialJoinRuleForSTDistanceFunction implements IAlgebr
         // Create filter function (spatial_intersect)
         ScalarFunctionCallExpression spatialIntersect = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT),
-                new MutableObject<>(enlargedLeft), new MutableObject<>(rightMBR));
+                new MutableObject<>(enlargedLeft.cloneExpression()), new MutableObject<>(rightMBR.cloneExpression()));
 
         // Attach the annotation to the spatial_intersect function if it is available
         if (distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
