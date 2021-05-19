@@ -28,12 +28,4 @@ public class SqlUnionMbrAggregateFunction extends AbstractUnionMbrAggregateFunct
             SourceLocation sourceLoc) throws HyracksDataException {
         super(args, context, sourceLoc);
     }
-
-    //    @Override
-    //    protected void processNull() {
-    //        if (type == AbstractMinMaxAggregateFunction.Type.GLOBAL || type == AbstractMinMaxAggregateFunction.Type.INTERMEDIATE) {
-    //            // getting NULL at the global step should only mean the local step ran into type invalidity
-    //            aggType = ATypeTag.NULL;
-    //        }
-    //    }
 }
