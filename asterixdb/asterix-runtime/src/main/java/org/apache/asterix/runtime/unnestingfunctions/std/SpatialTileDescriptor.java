@@ -118,40 +118,40 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
 
                         if (tag0 != ATypeTag.RECTANGLE) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes0[offset0],
-                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                                    ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
                         if (tag1 != ATypeTag.RECTANGLE) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
-                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                                    ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
                         if (tag2 != ATypeTag.BIGINT) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
-                                ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                                    ATypeTag.SERIALIZED_INT64_TYPE_TAG);
                         }
                         if (tag3 != ATypeTag.BIGINT) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
-                                ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                                    ATypeTag.SERIALIZED_INT64_TYPE_TAG);
                         }
 
                         double x1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
                         double y1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
 
                         double x2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
                         double y2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
                         double minX = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
                         double minY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
 
                         double maxX = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
                         double maxY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
                         int rows = (int) AInt64SerializerDeserializer.getLong(bytes2, offset2 + 1);
                         int columns = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);

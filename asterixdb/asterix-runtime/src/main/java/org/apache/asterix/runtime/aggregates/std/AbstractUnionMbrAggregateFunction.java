@@ -49,7 +49,10 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
     private IPointable inputVal = new VoidPointable();
     private final IScalarEvaluator eval;
     protected final IEvaluatorContext context;
-    protected ARectangle unionMbr;
+    protected double currentMinX;
+    protected double currentMinY;
+    protected double currentMaxX;
+    protected double currentMaxY;
 
     private ISerializerDeserializer<ARectangle> rectangleSerde =
             SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.ARECTANGLE);
@@ -63,8 +66,11 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
 
     @Override
     public void init() throws HyracksDataException {
-        // Initialize the resulting mbr
-        unionMbr = null;
+        // Initialize the resulting mbr coordinates
+        currentMinX = Double.POSITIVE_INFINITY;
+        currentMinY = Double.POSITIVE_INFINITY;
+        currentMaxX = Double.NEGATIVE_INFINITY;
+        currentMaxY = Double.NEGATIVE_INFINITY;
     }
 
     @Override
@@ -81,15 +87,10 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
         } else if (typeTag == ATypeTag.RECTANGLE) {
             DataInput dataIn = new DataInputStream(new ByteArrayInputStream(data, offset + 1, len - 1));
             ARectangle rect = ARectangleSerializerDeserializer.INSTANCE.deserialize(dataIn);
-            if (unionMbr != null) {
-                double minX = Math.min(unionMbr.getP1().getX(), rect.getP1().getX());
-                double minY = Math.min(unionMbr.getP1().getY(), rect.getP1().getY());
-                double maxX = Math.max(unionMbr.getP2().getX(), rect.getP2().getX());
-                double maxY = Math.max(unionMbr.getP2().getY(), rect.getP2().getY());
-                unionMbr = new ARectangle(new APoint(minX, minY), new APoint(maxX, maxY));
-            } else {
-                unionMbr = rect;
-            }
+            currentMinX = Math.min(currentMinX, rect.getP1().getX());
+            currentMinY = Math.min(currentMinY, rect.getP1().getY());
+            currentMaxX = Math.max(currentMaxX, rect.getP2().getX());
+            currentMaxY = Math.max(currentMaxY, rect.getP2().getY());
         }
     }
 
@@ -97,13 +98,9 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
     public void finish(IPointable result) throws HyracksDataException {
         resultStorage.reset();
         try {
-            if (unionMbr == null) {
-                // This might not be the best way to handle null, although unionMbr will be never null according
-                // to the test in finishPartial
-                unionMbr = new ARectangle(new APoint(0, 0), new APoint(0, 0));
-            } else {
-                rectangleSerde.serialize(unionMbr, resultStorage.getDataOutput());
-            }
+            ARectangle unionMbr =
+                    new ARectangle(new APoint(currentMinX, currentMinY), new APoint(currentMaxX, currentMaxY));
+            rectangleSerde.serialize(unionMbr, resultStorage.getDataOutput());
         } catch (IOException e) {
             throw HyracksDataException.create(e);
         }
@@ -112,7 +109,7 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
 
     @Override
     public void finishPartial(IPointable result) throws HyracksDataException {
-        if (unionMbr != null) {
+        if (isValidCoordinates(currentMinX, currentMinY, currentMaxX, currentMaxY)) {
             finish(result);
         }
     }
@@ -120,5 +117,10 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
     protected void processNull() throws UnsupportedItemTypeException {
         throw new UnsupportedItemTypeException(sourceLoc, BuiltinFunctions.UNION_MBR,
                 ATypeTag.SERIALIZED_SYSTEM_NULL_TYPE_TAG);
+    }
+
+    private boolean isValidCoordinates(double minX, double minY, double maxX, double maxY) {
+        return (minX != Double.POSITIVE_INFINITY) && (minY != Double.POSITIVE_INFINITY)
+                && (maxX != Double.NEGATIVE_INFINITY) && (maxY != Double.NEGATIVE_INFINITY);
     }
 }

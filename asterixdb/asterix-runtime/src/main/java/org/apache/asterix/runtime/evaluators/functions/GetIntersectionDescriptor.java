@@ -97,32 +97,32 @@ public class GetIntersectionDescriptor extends AbstractScalarFunctionDynamicDesc
 
                         if (tag0 != ATypeTag.RECTANGLE) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes0[offset0],
-                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                                    ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
                         if (tag1 != ATypeTag.RECTANGLE) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
-                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                                    ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
 
                         double ax1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
                         double ay1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
 
                         double ax2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
                         double ay2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
                         double bx1 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
                         double by1 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
 
                         double bx2 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
                         double by2 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+                                + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
                         // Bottom-left of the intersection rectangle
                         double ix1 = Math.max(ax1, bx1);
