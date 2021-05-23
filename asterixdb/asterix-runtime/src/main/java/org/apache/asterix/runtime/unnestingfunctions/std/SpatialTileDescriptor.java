@@ -116,73 +116,69 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
                         ATypeTag tag2 = EnumDeserializer.ATYPETAGDESERIALIZER.deserialize(bytes2[offset2]);
                         ATypeTag tag3 = EnumDeserializer.ATYPETAGDESERIALIZER.deserialize(bytes3[offset3]);
 
-                        if ((tag0 == ATypeTag.RECTANGLE) && (tag1 == ATypeTag.RECTANGLE) && (tag2 == ATypeTag.BIGINT)
-                                && (tag3 == ATypeTag.BIGINT)) {
+                        if (tag0 != ATypeTag.RECTANGLE) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes0[offset0],
+                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                        }
+                        if (tag1 != ATypeTag.RECTANGLE) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
+                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                        }
+                        if (tag2 != ATypeTag.BIGINT) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
+                                ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                        }
+                        if (tag3 != ATypeTag.BIGINT) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
+                                ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                        }
 
-                            double x1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
-                            double y1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+                        double x1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                        double y1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
 
-                            double x2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                                    + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
-                            double y2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                                    + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+                        double x2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
+                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                        double y2 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
+                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
-                            double minX = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
-                            double minY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+                        double minX = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                        double minY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
 
-                            double maxX = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                                    + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
-                            double maxY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                                    + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+                        double maxX = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
+                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                        double maxY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
+                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
-                            int rows = (int) AInt64SerializerDeserializer.getLong(bytes2, offset2 + 1);
-                            int columns = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
+                        int rows = (int) AInt64SerializerDeserializer.getLong(bytes2, offset2 + 1);
+                        int columns = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
 
-                            int row1 = (int) Math.ceil((y1 - minY) * rows / (maxY - minY));
-                            int col1 = (int) Math.ceil((x1 - minX) * columns / (maxX - minX));
-                            int row2 = (int) Math.ceil((y2 - minY) * rows / (maxY - minY));
-                            int col2 = (int) Math.ceil((x2 - minX) * columns / (maxX - minX));
+                        int row1 = (int) Math.ceil((y1 - minY) * rows / (maxY - minY));
+                        int col1 = (int) Math.ceil((x1 - minX) * columns / (maxX - minX));
+                        int row2 = (int) Math.ceil((y2 - minY) * rows / (maxY - minY));
+                        int col2 = (int) Math.ceil((x2 - minX) * columns / (maxX - minX));
 
-                            row1 = Math.min(Math.max(1, row1), rows * columns);
-                            col1 = Math.min(Math.max(1, col1), rows * columns);
-                            row2 = Math.min(Math.max(1, row2), rows * columns);
-                            col2 = Math.min(Math.max(1, col2), rows * columns);
+                        row1 = Math.min(Math.max(1, row1), rows * columns);
+                        col1 = Math.min(Math.max(1, col1), rows * columns);
+                        row2 = Math.min(Math.max(1, row2), rows * columns);
+                        col2 = Math.min(Math.max(1, col2), rows * columns);
 
-                            int minRow = Math.min(row1, row2);
-                            int maxRow = Math.max(row1, row2);
-                            int minCol = Math.min(col1, col2);
-                            int maxCol = Math.max(col1, col2);
+                        int minRow = Math.min(row1, row2);
+                        int maxRow = Math.max(row1, row2);
+                        int minCol = Math.min(col1, col2);
+                        int maxCol = Math.max(col1, col2);
 
-                            tileValues.clear();
-                            for (int i = minRow; i <= maxRow; i++) {
-                                for (int j = minCol; j <= maxCol; j++) {
-                                    int tileId = (i - 1) * columns + j;
-                                    tileValues.add(tileId);
-                                }
-                            }
-                            pos = 0;
-                        } else {
-                            if (tag0 != ATypeTag.RECTANGLE) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes0[offset0],
-                                        ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
-                            }
-                            if (tag1 != ATypeTag.RECTANGLE) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
-                                        ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
-                            }
-                            if (tag2 != ATypeTag.BIGINT) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
-                                        ATypeTag.SERIALIZED_INT64_TYPE_TAG);
-                            }
-                            if (tag3 != ATypeTag.BIGINT) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
-                                        ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                        tileValues.clear();
+                        for (int i = minRow; i <= maxRow; i++) {
+                            for (int j = minCol; j <= maxCol; j++) {
+                                int tileId = (i - 1) * columns + j;
+                                tileValues.add(tileId);
                             }
                         }
+                        pos = 0;
                     }
 
                     @SuppressWarnings("unchecked")

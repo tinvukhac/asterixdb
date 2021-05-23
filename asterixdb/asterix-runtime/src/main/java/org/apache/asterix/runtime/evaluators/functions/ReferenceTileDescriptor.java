@@ -110,73 +110,70 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                         ATypeTag tag3 = EnumDeserializer.ATYPETAGDESERIALIZER.deserialize(bytes3[offset3]);
                         ATypeTag tag4 = EnumDeserializer.ATYPETAGDESERIALIZER.deserialize(bytes4[offset4]);
 
-                        if ((tag0 == ATypeTag.RECTANGLE) && (tag1 == ATypeTag.RECTANGLE) && (tag2 == ATypeTag.RECTANGLE)
-                                && (tag3 == ATypeTag.BIGINT) && (tag4 == ATypeTag.BIGINT)) {
-                            double ax1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
-                            double ay1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
-
-                            double bx1 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
-                            double by1 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
-
-                            double minX = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
-                            double minY = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
-                                    + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
-
-                            double maxX = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
-                                    + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
-                            double maxY = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
-                                    + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
-
-                            int rows = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
-                            int columns = (int) AInt64SerializerDeserializer.getLong(bytes4, offset4 + 1);
-
-                            // Compute the reference point
-                            double x = Math.max(ax1, bx1);
-                            double y = Math.max(ay1, by1);
-
-                            // Compute the tile ID of the reference point
-                            int row = (int) Math.ceil((y - minY) * rows / (maxY - minY));
-                            int col = (int) Math.ceil((x - minX) * columns / (maxX - minX));
-
-                            row = Math.min(Math.max(1, row), rows * columns);
-                            col = Math.min(Math.max(1, col), rows * columns);
-
-                            int tileId = (row - 1) * columns + col;
-                            try {
-                                out.writeByte(ATypeTag.SERIALIZED_INT32_TYPE_TAG);
-                                out.writeInt(tileId);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                throw HyracksDataException.create(e);
-                            }
-                            result.set(resultStorage);
-                        } else {
-                            if (tag0 != ATypeTag.RECTANGLE) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes0[offset0],
-                                        ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
-                            }
-                            if (tag1 != ATypeTag.RECTANGLE) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
-                                        ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
-                            }
-                            if (tag2 != ATypeTag.RECTANGLE) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
-                                        ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
-                            }
-                            if (tag3 != ATypeTag.BIGINT) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
-                                        ATypeTag.SERIALIZED_INT64_TYPE_TAG);
-                            }
-                            if (tag4 != ATypeTag.BIGINT) {
-                                throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes4[offset4],
-                                        ATypeTag.SERIALIZED_INT64_TYPE_TAG);
-                            }
+                        if (tag0 != ATypeTag.RECTANGLE) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes0[offset0],
+                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
+                        if (tag1 != ATypeTag.RECTANGLE) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
+                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                        }
+                        if (tag2 != ATypeTag.RECTANGLE) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
+                                ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
+                        }
+                        if (tag3 != ATypeTag.BIGINT) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
+                                ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                        }
+                        if (tag4 != ATypeTag.BIGINT) {
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes4[offset4],
+                                ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                        }
+
+                        double ax1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                        double ay1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+
+                        double bx1 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                        double by1 = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+
+                        double minX = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.X));
+                        double minY = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
+                            + ARectangleSerializerDeserializer.getBottomLeftCoordinateOffset(Coordinate.Y));
+
+                        double maxX = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
+                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.X));
+                        double maxY = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
+                            + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
+
+                        int rows = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
+                        int columns = (int) AInt64SerializerDeserializer.getLong(bytes4, offset4 + 1);
+
+                        // Compute the reference point
+                        double x = Math.max(ax1, bx1);
+                        double y = Math.max(ay1, by1);
+
+                        // Compute the tile ID of the reference point
+                        int row = (int) Math.ceil((y - minY) * rows / (maxY - minY));
+                        int col = (int) Math.ceil((x - minX) * columns / (maxX - minX));
+
+                        row = Math.min(Math.max(1, row), rows * columns);
+                        col = Math.min(Math.max(1, col), rows * columns);
+
+                        int tileId = (row - 1) * columns + col;
+                        try {
+                            out.writeByte(ATypeTag.SERIALIZED_INT32_TYPE_TAG);
+                            out.writeInt(tileId);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            throw HyracksDataException.create(e);
+                        }
+                        result.set(resultStorage);
                     }
                 };
             }
