@@ -86,6 +86,10 @@ public class GetIntersectionDescriptor extends AbstractScalarFunctionDynamicDesc
                         eval0.evaluate(tuple, inputArg0);
                         eval1.evaluate(tuple, inputArg1);
 
+                        if (PointableHelper.checkAndSetMissingOrNull(result, inputArg0, inputArg1)) {
+                            return;
+                        }
+
                         byte[] bytes0 = inputArg0.getByteArray();
                         byte[] bytes1 = inputArg1.getByteArray();
 
