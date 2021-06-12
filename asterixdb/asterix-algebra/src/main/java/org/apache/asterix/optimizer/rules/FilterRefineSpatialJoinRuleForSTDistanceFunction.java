@@ -45,7 +45,7 @@ import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
  * For example:<br/>
  *
  * SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
- * WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 &#42;/ st_distance(ps.geom,ls.geom) < 100.5;
+ * WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) &#42;/ st_distance(ps.geom,ls.geom) < 100.5;
  *
  * -- DISTRIBUTE_RESULT  |UNPARTITIONED|
  *   -- ONE_TO_ONE_EXCHANGE  |UNPARTITIONED|
@@ -76,7 +76,7 @@ import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
  * Becomes,
  *
  * SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
- * WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 &#42;/
+ * WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) &#42;/
  * spatial_intersect(st_mbr_offset(ps.geom, 100.5),st_mbr(ls.geom)) and st_distance(ps.geom,ls.geom) < 100.5;
  *
  * -- DISTRIBUTE_RESULT  |UNPARTITIONED|

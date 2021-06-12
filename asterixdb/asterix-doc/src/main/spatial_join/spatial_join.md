@@ -40,7 +40,7 @@ However, users can also set other values for these parameters using spatial part
 In this example, assume that MBR of two input datasets is (-180.0, -83.0, 180.0, 90.0) and grid size is 10x10.
 
 
-    /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */
+    /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) */
 
 
 ##### Spatial partitioning hint in a query 
@@ -62,4 +62,4 @@ In this example, assume that MBR of two input datasets is (-180.0, -83.0, 180.0,
     CREATE DATASET LakeSet (GeomType) primary key id;
 
     SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
-    WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */ spatial_intersect(ps.geom, ls.geom);
+    WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) */ spatial_intersect(ps.geom, ls.geom);
