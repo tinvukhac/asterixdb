@@ -38,28 +38,28 @@ However, users can also set other values for these parameters using spatial part
 
 ##### Spatial partitioning hint example
 In this example, assume that MBR of two input datasets is (-180.0, -83.0, 180.0, 90.0) and grid size is 10x10.
-```sql92
-/*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */
-```
+
+
+    /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */
+
 
 ##### Spatial partitioning hint in a query 
-```sql92
-DROP DATAVERSE test IF EXISTS;
-CREATE DATAVERSE test;
-USE test;
 
--- Make GeomType 
-CREATE TYPE GeomType as closed {
-    id: int32,
-    geom: rectangle
-};
+    DROP DATAVERSE test IF EXISTS;
+    CREATE DATAVERSE test;
+    USE test;
 
--- Make Park dataset 
-CREATE DATASET ParkSet (GeomType) primary key id;
+    -- Make GeomType 
+    CREATE TYPE GeomType as closed {
+        id: int32,
+        geom: rectangle
+    };
 
--- Make Lake dataset 
-CREATE DATASET LakeSet (GeomType) primary key id;
+    -- Make Park dataset 
+    CREATE DATASET ParkSet (GeomType) primary key id;
 
-SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
-WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */ spatial_intersect(ps.geom, ls.geom);
-```
+    -- Make Lake dataset 
+    CREATE DATASET LakeSet (GeomType) primary key id;
+
+    SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
+    WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */ spatial_intersect(ps.geom, ls.geom);

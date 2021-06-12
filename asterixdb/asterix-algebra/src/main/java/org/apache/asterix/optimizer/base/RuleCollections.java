@@ -420,11 +420,4 @@ public final class RuleCollections {
         prepareForJobGenRewrites.add(new FixReplicateOperatorOutputsRule());
         return prepareForJobGenRewrites;
     }
-
-//    public static final List<IAlgebraicRewriteRule> buildFilterRefineSpatialJoinRuleCollection() {
-//        List<IAlgebraicRewriteRule> filterRefineSpatialJoin = new LinkedList<>();
-//        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTFunctions());
-//        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTDistanceFunction());
-//        return filterRefineSpatialJoin;
-//    }
 }
