@@ -223,6 +223,8 @@ public final class RuleCollections {
     public static final List<IAlgebraicRewriteRule> buildCondPushDownAndJoinInferenceRuleCollection() {
         List<IAlgebraicRewriteRule> condPushDownAndJoinInference = new LinkedList<>();
 
+        condPushDownAndJoinInference.add(new FilterRefineSpatialJoinRuleForSTFunctions());
+        condPushDownAndJoinInference.add(new FilterRefineSpatialJoinRuleForSTDistanceFunction());
         condPushDownAndJoinInference.add(new PushSelectDownRule());
         condPushDownAndJoinInference.add(new PushSortDownRule());
         condPushDownAndJoinInference.add(new RemoveRedundantListifyRule(false));
@@ -419,10 +421,10 @@ public final class RuleCollections {
         return prepareForJobGenRewrites;
     }
 
-    public static final List<IAlgebraicRewriteRule> buildFilterRefineSpatialJoinRuleCollection() {
-        List<IAlgebraicRewriteRule> filterRefineSpatialJoin = new LinkedList<>();
-        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTFunctions());
-        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTDistanceFunction());
-        return filterRefineSpatialJoin;
-    }
+//    public static final List<IAlgebraicRewriteRule> buildFilterRefineSpatialJoinRuleCollection() {
+//        List<IAlgebraicRewriteRule> filterRefineSpatialJoin = new LinkedList<>();
+//        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTFunctions());
+//        filterRefineSpatialJoin.add(new FilterRefineSpatialJoinRuleForSTDistanceFunction());
+//        return filterRefineSpatialJoin;
+//    }
 }
