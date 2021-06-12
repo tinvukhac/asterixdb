@@ -634,14 +634,25 @@ class SQLPPParser extends ScopeChecker implements IParser {
             }
           case SPATIAL_JOIN_HINT:
             String[] splits = hintToken.hintParams != null ? hintToken.hintParams.replaceAll("[\\(\\)\\s]", "").split(",") : null;
-            double minX = Double.parseDouble(splits[0]);
-            double minY = Double.parseDouble(splits[1]);
-            double maxX = Double.parseDouble(splits[2]);
-            double maxY = Double.parseDouble(splits[3]);
-            int numRows = Integer.parseInt(splits[4]);
-            int numColumns = Integer.parseInt(splits[5]);
-            SpatialJoinAnnotation spatialJoinAnn = new SpatialJoinAnnotation(minX, minY, maxX, maxY, numRows, numColumns);
-            return spatialJoinAnn;
+            try {
+              double minX = Double.parseDouble(splits[0]);
+              double minY = Double.parseDouble(splits[1]);
+              double maxX = Double.parseDouble(splits[2]);
+              double maxY = Double.parseDouble(splits[3]);
+              int numRows = Integer.parseInt(splits[4]);
+              int numColumns = Integer.parseInt(splits[5]);
+              SpatialJoinAnnotation spatialJoinAnn = new SpatialJoinAnnotation(minX, minY, maxX, maxY, numRows, numColumns);
+              return spatialJoinAnn;
+            } catch (NullPointerException e) {
+                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. %s: %s",
+                                    hintToken.hint.toString(), e.getClass().getName(), e.getMessage()));
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. %s: %s",
+                                    hintToken.hint.toString(), e.getClass().getName(), e.getMessage()));
+            } catch (NumberFormatException e) {
+                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. %s: %s",
+                                    hintToken.hint.toString(), e.getClass().getName(), e.getMessage()));
+            }
           case USE_SECONDARY_INDEX_SEARCH_HINT:
             if (hintToken.hintParams == null) {
               throw new SqlppParseException(getSourceLocation(hintToken), "Expected index name(s)");
@@ -663,24 +674,6 @@ class SQLPPParser extends ScopeChecker implements IParser {
         if (warningCollector.shouldWarn()) {
             warningCollector.warn(Warning.of(getSourceLocation(hintToken), ErrorCode.INVALID_HINT,
               hintToken.hint.toString(), e.getMessage()));
-        }
-        return onParseErrorReturn;
-      } catch (NullPointerException e) {
-        if (warningCollector.shouldWarn()) {
-            warningCollector.warn(Warning.of(getSourceLocation(hintToken), ErrorCode.INVALID_HINT,
-                          hintToken.hint.toString(), e.getMessage()));
-        }
-        return onParseErrorReturn;
-      } catch (ArrayIndexOutOfBoundsException e) {
-        if (warningCollector.shouldWarn()) {
-            warningCollector.warn(Warning.of(getSourceLocation(hintToken), ErrorCode.INVALID_HINT,
-                          hintToken.hint.toString(), e.getMessage()));
-        }
-        return onParseErrorReturn;
-      } catch (NumberFormatException e) {
-        if (warningCollector.shouldWarn()) {
-            warningCollector.warn(Warning.of(getSourceLocation(hintToken), ErrorCode.INVALID_HINT,
-                          hintToken.hint.toString(), e.getMessage()));
         }
         return onParseErrorReturn;
       }
