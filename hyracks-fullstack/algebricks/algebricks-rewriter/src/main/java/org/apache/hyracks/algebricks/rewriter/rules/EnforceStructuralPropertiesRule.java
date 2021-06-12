@@ -839,7 +839,7 @@ public class EnforceStructuralPropertiesRule implements IAlgebraicRewriteRule {
      * @return an aggregate operator with the specified information
      * @throws AlgebricksException when there is error setting the type environment of the newly created aggregate op
      */
-    public static AggregateOperator createAggregate(List<LogicalVariable> resultVariables, boolean isGlobal,
+    private static AggregateOperator createAggregate(List<LogicalVariable> resultVariables, boolean isGlobal,
             List<Mutable<ILogicalExpression>> expressions, MutableObject<ILogicalOperator> inputOperator,
             IOptimizationContext context, SourceLocation sourceLocation) throws AlgebricksException {
         AggregateOperator aggregateOperator = new AggregateOperator(resultVariables, expressions);

@@ -67,6 +67,7 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnionAllOper
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnnestOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.visitors.VariableUtilities;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.AbstractJoinPOperator;
+import org.apache.hyracks.algebricks.core.algebra.operators.physical.AggregatePOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.AssignPOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.BroadcastExchangePOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.NestedLoopJoinPOperator;
@@ -74,7 +75,6 @@ import org.apache.hyracks.algebricks.core.algebra.operators.physical.OneToOneExc
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.ReplicatePOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.StreamProjectPOperator;
 import org.apache.hyracks.algebricks.core.algebra.util.OperatorManipulationUtil;
-import org.apache.hyracks.algebricks.rewriter.rules.EnforceStructuralPropertiesRule;
 import org.apache.hyracks.api.exceptions.SourceLocation;
 
 public class SpatialJoinUtils {
@@ -523,7 +523,7 @@ public class SpatialJoinUtils {
         LogicalVariable localOutVariable = context.newVar();
         localAggResultVars.add(localOutVariable);
         localAggFuncs.add(new MutableObject<>(localAggExpr));
-        AggregateOperator localAggOperator = EnforceStructuralPropertiesRule.createAggregate(localAggResultVars, false,
+        AggregateOperator localAggOperator = createAggregate(localAggResultVars, false,
                 localAggFuncs, exchToLocalAggRef, context, op.getSourceLocation());
         MutableObject<ILogicalOperator> localAgg = new MutableObject<>(localAggOperator);
 
@@ -548,7 +548,7 @@ public class SpatialJoinUtils {
         globalAggResultVars.add(context.newVar());
         List<Mutable<ILogicalExpression>> globalAggFuncs = new ArrayList<>(1);
         globalAggFuncs.add(new MutableObject<>(globalAggExpr));
-        AggregateOperator globalAggOperator = EnforceStructuralPropertiesRule.createAggregate(globalAggResultVars, true,
+        AggregateOperator globalAggOperator = createAggregate(globalAggResultVars, true,
                 globalAggFuncs, inputOperator, context, op.getSourceLocation());
         globalAggOperator.recomputeSchema();
         context.computeAndSetTypeEnvironmentForOperator(globalAggOperator);
@@ -577,6 +577,35 @@ public class SpatialJoinUtils {
                 createLocalAndGlobalAggregateOperators(op, context, inputVar, exchToLocalAggRef);
         return new Triple<>(createLocalAndGlobalAggResult.first, createLocalAndGlobalAggResult.second,
                 exchToForwardRef);
+    }
+
+    /**
+     * Creates an aggregate operator. $$resultVariables = expressions()
+     * @param resultVariables the variables which stores the result of the aggregation
+     * @param isGlobal whether the aggregate operator is a global or local one
+     * @param expressions the aggregation functions desired
+     * @param inputOperator the input op that is feeding the aggregate operator
+     * @param context optimization context
+     * @param sourceLocation source location
+     * @return an aggregate operator with the specified information
+     * @throws AlgebricksException when there is error setting the type environment of the newly created aggregate op
+     */
+    private static AggregateOperator createAggregate(List<LogicalVariable> resultVariables, boolean isGlobal,
+                                                    List<Mutable<ILogicalExpression>> expressions, MutableObject<ILogicalOperator> inputOperator,
+                                                    IOptimizationContext context, SourceLocation sourceLocation) throws AlgebricksException {
+        AggregateOperator aggregateOperator = new AggregateOperator(resultVariables, expressions);
+        aggregateOperator.setPhysicalOperator(new AggregatePOperator());
+        aggregateOperator.setSourceLocation(sourceLocation);
+        aggregateOperator.getInputs().add(inputOperator);
+        aggregateOperator.setGlobal(isGlobal);
+        if (!isGlobal) {
+            aggregateOperator.setExecutionMode(AbstractLogicalOperator.ExecutionMode.LOCAL);
+        } else {
+            aggregateOperator.setExecutionMode(AbstractLogicalOperator.ExecutionMode.UNPARTITIONED);
+        }
+        aggregateOperator.recomputeSchema();
+        context.computeAndSetTypeEnvironmentForOperator(aggregateOperator);
+        return aggregateOperator;
     }
 
     private static Mutable<ILogicalExpression> createRectangleExpression(SpatialJoinAnnotation spatialJoinAnn) {

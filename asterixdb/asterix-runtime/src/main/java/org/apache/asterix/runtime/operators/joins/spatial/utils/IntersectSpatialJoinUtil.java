@@ -29,8 +29,6 @@ public class IntersectSpatialJoinUtil implements ISpatialJoinUtil {
     protected final int[] idBuild;
     protected final int[] idProbe;
 
-    protected final SpatialLogic sl = new SpatialLogic();
-
     public IntersectSpatialJoinUtil(int[] idBuild, int[] idProbe) {
         this.idBuild = idBuild;
         this.idProbe = idProbe;
@@ -107,7 +105,7 @@ public class IntersectSpatialJoinUtil implements ISpatialJoinUtil {
 
     @Override
     public boolean compareRectangle(ARectangle rectBuild, ARectangle rectProbe) {
-        return sl.intersects(rectBuild, rectProbe);
+        return SpatialLogic.intersects(rectBuild, rectProbe);
     }
 
     @Override
