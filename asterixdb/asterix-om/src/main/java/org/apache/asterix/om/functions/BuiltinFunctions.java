@@ -2184,9 +2184,9 @@ public class BuiltinFunctions {
         addFunction(GET_CIRCLE_RADIUS_ACCESSOR, ADoubleTypeComputer.INSTANCE, true);
         addFunction(GET_CIRCLE_CENTER_ACCESSOR, APointTypeComputer.INSTANCE, true);
         addFunction(GET_POINTS_LINE_RECTANGLE_POLYGON_ACCESSOR, OrderedListOfAPointTypeComputer.INSTANCE, true);
-        addFunction(SPATIAL_TILE, AInt32TypeComputer.INSTANCE, true);
-        addFunction(REFERENCE_TILE, AInt32TypeComputer.INSTANCE, true);
-        addFunction(GET_INTERSECTION, ARectangleTypeComputer.INSTANCE, true);
+        addPrivateFunction(SPATIAL_TILE, AInt32TypeComputer.INSTANCE, true);
+        addPrivateFunction(REFERENCE_TILE, AInt32TypeComputer.INSTANCE, true);
+        addPrivateFunction(GET_INTERSECTION, ARectangleTypeComputer.INSTANCE, true);
 
         //geo functions
         addFunction(ST_AREA, ADoubleTypeComputer.INSTANCE, true);
@@ -2257,8 +2257,8 @@ public class BuiltinFunctions {
         addPrivateFunction(ST_UNION_SQL_AGG, AGeometryTypeComputer.INSTANCE, true);
         addFunction(ST_POLYGONIZE, AGeometryTypeComputer.INSTANCE, true);
 
-        addFunction(ST_MBR, ARectangleTypeComputer.INSTANCE, true);
-        addFunction(ST_MBR_ENLARGE, ARectangleTypeComputer.INSTANCE, true);
+        addPrivateFunction(ST_MBR, ARectangleTypeComputer.INSTANCE, true);
+        addPrivateFunction(ST_MBR_ENLARGE, ARectangleTypeComputer.INSTANCE, true);
 
         // Binary functions
         addFunction(BINARY_HEX_CONSTRUCTOR, ABinaryTypeComputer.INSTANCE, true);
