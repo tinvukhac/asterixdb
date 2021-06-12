@@ -21,7 +21,7 @@
   <parent>
     <artifactId>apache-asterixdb</artifactId>
     <groupId>org.apache.asterix</groupId>
-    <version>0.9.6-SNAPSHOT</version>
+    <version>0.9.7-SNAPSHOT</version>
   </parent>
   <licenses>
     <license>
@@ -287,7 +287,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
