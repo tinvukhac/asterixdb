@@ -92,7 +92,8 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                         eval3.evaluate(tuple, inputArg3);
                         eval4.evaluate(tuple, inputArg4);
 
-                        if (PointableHelper.checkAndSetMissingOrNull(result, inputArg0, inputArg1, inputArg2, inputArg3)) {
+                        if (PointableHelper.checkAndSetMissingOrNull(result, inputArg0, inputArg1, inputArg2,
+                                inputArg3)) {
                             return;
                         }
 

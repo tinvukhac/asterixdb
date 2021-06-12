@@ -3323,11 +3323,18 @@ public class BuiltinFunctions {
     }
 
     public enum SpatialFilterKind {
-        SI
+        SI,
+        STFR
     }
 
     static {
         spatialFilterFunctions.put(BuiltinFunctions.SPATIAL_INTERSECT, SpatialFilterKind.SI);
+        spatialFilterFunctions.put(BuiltinFunctions.ST_INTERSECTS, SpatialFilterKind.STFR);
+        spatialFilterFunctions.put(BuiltinFunctions.ST_OVERLAPS, SpatialFilterKind.STFR);
+        spatialFilterFunctions.put(BuiltinFunctions.ST_TOUCHES, SpatialFilterKind.STFR);
+        spatialFilterFunctions.put(BuiltinFunctions.ST_CONTAINS, SpatialFilterKind.STFR);
+        spatialFilterFunctions.put(BuiltinFunctions.ST_CROSSES, SpatialFilterKind.STFR);
+        spatialFilterFunctions.put(BuiltinFunctions.ST_WITHIN, SpatialFilterKind.STFR);
     }
 
     public static boolean isGlobalAggregateFunction(FunctionIdentifier fi) {
@@ -3335,7 +3342,11 @@ public class BuiltinFunctions {
     }
 
     public static boolean isSpatialFilterFunction(FunctionIdentifier fi) {
-        return spatialFilterFunctions.get(fi) != null;
+        return spatialFilterFunctions.get(fi) == SpatialFilterKind.SI;
+    }
+
+    public static boolean isSTFilterRefineFunction(FunctionIdentifier fi) {
+        return spatialFilterFunctions.get(fi) == SpatialFilterKind.STFR;
     }
 
     static {
@@ -3348,24 +3359,5 @@ public class BuiltinFunctions {
 
     public static boolean isSimilarityFunction(FunctionIdentifier fi) {
         return similarityFunctions.contains(fi);
-    }
-
-    private static final Map<FunctionIdentifier, STFilterRefineFunctionKind> stFilterRefineFunctions = new HashMap<>();
-
-    public enum STFilterRefineFunctionKind {
-        STFR
-    }
-
-    static {
-        stFilterRefineFunctions.put(BuiltinFunctions.ST_INTERSECTS, STFilterRefineFunctionKind.STFR);
-        stFilterRefineFunctions.put(BuiltinFunctions.ST_OVERLAPS, STFilterRefineFunctionKind.STFR);
-        stFilterRefineFunctions.put(BuiltinFunctions.ST_TOUCHES, STFilterRefineFunctionKind.STFR);
-        stFilterRefineFunctions.put(BuiltinFunctions.ST_CONTAINS, STFilterRefineFunctionKind.STFR);
-        stFilterRefineFunctions.put(BuiltinFunctions.ST_CROSSES, STFilterRefineFunctionKind.STFR);
-        stFilterRefineFunctions.put(BuiltinFunctions.ST_WITHIN, STFilterRefineFunctionKind.STFR);
-    }
-
-    public static boolean isSTFilterRefineFunction(FunctionIdentifier fi) {
-        return stFilterRefineFunctions.get(fi) != null;
     }
 }

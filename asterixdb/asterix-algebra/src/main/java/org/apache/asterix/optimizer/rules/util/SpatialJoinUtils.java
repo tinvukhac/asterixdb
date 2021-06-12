@@ -523,8 +523,8 @@ public class SpatialJoinUtils {
         LogicalVariable localOutVariable = context.newVar();
         localAggResultVars.add(localOutVariable);
         localAggFuncs.add(new MutableObject<>(localAggExpr));
-        AggregateOperator localAggOperator = createAggregate(localAggResultVars, false,
-                localAggFuncs, exchToLocalAggRef, context, op.getSourceLocation());
+        AggregateOperator localAggOperator = createAggregate(localAggResultVars, false, localAggFuncs,
+                exchToLocalAggRef, context, op.getSourceLocation());
         MutableObject<ILogicalOperator> localAgg = new MutableObject<>(localAggOperator);
 
         // Output of local aggregate operator is the input of global aggregate operator
@@ -548,8 +548,8 @@ public class SpatialJoinUtils {
         globalAggResultVars.add(context.newVar());
         List<Mutable<ILogicalExpression>> globalAggFuncs = new ArrayList<>(1);
         globalAggFuncs.add(new MutableObject<>(globalAggExpr));
-        AggregateOperator globalAggOperator = createAggregate(globalAggResultVars, true,
-                globalAggFuncs, inputOperator, context, op.getSourceLocation());
+        AggregateOperator globalAggOperator = createAggregate(globalAggResultVars, true, globalAggFuncs, inputOperator,
+                context, op.getSourceLocation());
         globalAggOperator.recomputeSchema();
         context.computeAndSetTypeEnvironmentForOperator(globalAggOperator);
         MutableObject<ILogicalOperator> globalAgg = new MutableObject<>(globalAggOperator);
@@ -591,8 +591,8 @@ public class SpatialJoinUtils {
      * @throws AlgebricksException when there is error setting the type environment of the newly created aggregate op
      */
     private static AggregateOperator createAggregate(List<LogicalVariable> resultVariables, boolean isGlobal,
-                                                    List<Mutable<ILogicalExpression>> expressions, MutableObject<ILogicalOperator> inputOperator,
-                                                    IOptimizationContext context, SourceLocation sourceLocation) throws AlgebricksException {
+            List<Mutable<ILogicalExpression>> expressions, MutableObject<ILogicalOperator> inputOperator,
+            IOptimizationContext context, SourceLocation sourceLocation) throws AlgebricksException {
         AggregateOperator aggregateOperator = new AggregateOperator(resultVariables, expressions);
         aggregateOperator.setPhysicalOperator(new AggregatePOperator());
         aggregateOperator.setSourceLocation(sourceLocation);
