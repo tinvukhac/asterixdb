@@ -12,7 +12,7 @@
                       -- STREAM_SELECT  |PARTITIONED|
                         -- STREAM_PROJECT  |PARTITIONED|
                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                            -- SPATIAL_JOIN [$$63, $$52] [$$64, $$53]  |PARTITIONED|
+                            -- SPATIAL_JOIN [$$65, $$50] [$$66, $$51]  |PARTITIONED|
                               -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                                 -- STABLE_SORT [$$63(ASC), $$52(ASC)]  |PARTITIONED|
                                   -- HASH_PARTITION_EXCHANGE [$$63]  |PARTITIONED|
