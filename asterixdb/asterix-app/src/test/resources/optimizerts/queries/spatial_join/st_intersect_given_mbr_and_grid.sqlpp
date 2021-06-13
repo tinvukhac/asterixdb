@@ -41,4 +41,4 @@ CREATE DATASET LakeSet (LakeType) primary key id;
 
 -- Run query with spatial partitioning hint
 SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
-WHERE /*+ spatial-partitioning -180.0 -83.0 180.0 90.0 10 10 */ st_intersects(ps.geom, ls.geom);
+WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) */ st_intersects(ps.geom, ls.geom);
