@@ -8,7 +8,7 @@
               -- STREAM_SELECT  |PARTITIONED|
                 -- STREAM_PROJECT  |PARTITIONED|
                   -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                    -- SPATIAL_JOIN [$$57, $$50] [$$58, $$51]  |PARTITIONED|
+                    -- SPATIAL_JOIN [$$53, $$49] [$$54, $$50]  |PARTITIONED|
                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                         -- STABLE_SORT [$$53(ASC), $$49(ASC)]  |PARTITIONED|
                           -- HASH_PARTITION_EXCHANGE [$$53]  |PARTITIONED|
@@ -17,7 +17,7 @@
                                 -- ASSIGN  |PARTITIONED|
                                   -- STREAM_PROJECT  |PARTITIONED|
                                     -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                      -- DATASOURCE_SCAN (test.ParkSet)  |PARTITIONED|
+                                      -- DATASOURCE_SCAN  |PARTITIONED|
                                         -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                                           -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
@@ -28,6 +28,6 @@
                                 -- ASSIGN  |PARTITIONED|
                                   -- STREAM_PROJECT  |PARTITIONED|
                                     -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                      -- DATASOURCE_SCAN (test.LakeSet)  |PARTITIONED|
+                                      -- DATASOURCE_SCAN  |PARTITIONED|
                                         -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                                           -- EMPTY_TUPLE_SOURCE  |PARTITIONED|

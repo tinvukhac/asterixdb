@@ -8,28 +8,28 @@
               -- STREAM_SELECT  |PARTITIONED|
                 -- STREAM_PROJECT  |PARTITIONED|
                   -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                    -- SPATIAL_JOIN [$$55, $$52] [$$56, $$53]  |PARTITIONED|
+                    -- SPATIAL_JOIN [$$57, $$50] [$$58, $$51]  |PARTITIONED|
                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                        -- STABLE_SORT [$$55(ASC), $$52(ASC)]  |PARTITIONED|
-                          -- HASH_PARTITION_EXCHANGE [$$55]  |PARTITIONED|
+                        -- STABLE_SORT [$$57(ASC), $$50(ASC)]  |PARTITIONED|
+                          -- HASH_PARTITION_EXCHANGE [$$57]  |PARTITIONED|
                             -- UNNEST  |PARTITIONED|
                               -- ASSIGN  |PARTITIONED|
                                 -- STREAM_PROJECT  |PARTITIONED|
                                   -- ASSIGN  |PARTITIONED|
                                     -- STREAM_PROJECT  |PARTITIONED|
                                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                        -- DATASOURCE_SCAN (test.ParkSet)  |PARTITIONED|
+                                        -- DATASOURCE_SCAN  |PARTITIONED|
                                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                                             -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                        -- STABLE_SORT [$$56(ASC), $$53(ASC)]  |PARTITIONED|
-                          -- HASH_PARTITION_EXCHANGE [$$56]  |PARTITIONED|
+                        -- STABLE_SORT [$$58(ASC), $$51(ASC)]  |PARTITIONED|
+                          -- HASH_PARTITION_EXCHANGE [$$58]  |PARTITIONED|
                             -- UNNEST  |PARTITIONED|
                               -- ASSIGN  |PARTITIONED|
                                 -- STREAM_PROJECT  |PARTITIONED|
                                   -- ASSIGN  |PARTITIONED|
                                     -- STREAM_PROJECT  |PARTITIONED|
                                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                        -- DATASOURCE_SCAN (test.LakeSet)  |PARTITIONED|
+                                        -- DATASOURCE_SCAN  |PARTITIONED|
                                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                                             -- EMPTY_TUPLE_SOURCE  |PARTITIONED|

@@ -10,19 +10,7 @@
                   -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                     -- SPATIAL_JOIN [$$62, $$52] [$$63, $$53]  |PARTITIONED|
                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                        -- STABLE_SORT [$$61(ASC), $$56(ASC)]  |PARTITIONED|
-                          -- HASH_PARTITION_EXCHANGE [$$61]  |PARTITIONED|
-                            -- UNNEST  |PARTITIONED|
-                              -- ASSIGN  |PARTITIONED|
-                                -- STREAM_PROJECT  |PARTITIONED|
-                                  -- ASSIGN  |PARTITIONED|
-                                    -- STREAM_PROJECT  |PARTITIONED|
-                                      -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                        -- DATASOURCE_SCAN (test.ParkSet)  |PARTITIONED|
-                                          -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                            -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
-                      -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                        -- STABLE_SORT [$$62(ASC), $$57(ASC)]  |PARTITIONED|
+                        -- STABLE_SORT [$$62(ASC), $$52(ASC)]  |PARTITIONED|
                           -- HASH_PARTITION_EXCHANGE [$$62]  |PARTITIONED|
                             -- UNNEST  |PARTITIONED|
                               -- ASSIGN  |PARTITIONED|
@@ -30,6 +18,18 @@
                                   -- ASSIGN  |PARTITIONED|
                                     -- STREAM_PROJECT  |PARTITIONED|
                                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
-                                        -- DATASOURCE_SCAN (test.LakeSet)  |PARTITIONED|
+                                        -- DATASOURCE_SCAN  |PARTITIONED|
+                                          -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
+                                            -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
+                      -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
+                        -- STABLE_SORT [$$63(ASC), $$53(ASC)]  |PARTITIONED|
+                          -- HASH_PARTITION_EXCHANGE [$$63]  |PARTITIONED|
+                            -- UNNEST  |PARTITIONED|
+                              -- ASSIGN  |PARTITIONED|
+                                -- STREAM_PROJECT  |PARTITIONED|
+                                  -- ASSIGN  |PARTITIONED|
+                                    -- STREAM_PROJECT  |PARTITIONED|
+                                      -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
+                                        -- DATASOURCE_SCAN  |PARTITIONED|
                                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
                                             -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
