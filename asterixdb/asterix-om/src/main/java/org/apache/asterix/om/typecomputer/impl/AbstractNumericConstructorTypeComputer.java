@@ -16,10 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Description  : test sub type duration (year_month_duration and day_time_duration) constructors
- * Expected Res : Success
- * Date         : 7 May 2013
- * issue        : 363
- */
 
+package org.apache.asterix.om.typecomputer.impl;
+
+import org.apache.asterix.om.types.IAType;
+import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
+
+public abstract class AbstractNumericConstructorTypeComputer extends AbstractConstructorTypeComputer {
+
+    protected AbstractNumericConstructorTypeComputer(IAType primeType, boolean nullable) {
+        super(primeType, nullable);
+    }
+
+    @Override
+    protected boolean isAlwaysCastable(IAType inputType) {
+        return super.isAlwaysCastable(inputType)
+                || ATypeHierarchy.getTypeDomain(inputType.getTypeTag()) == ATypeHierarchy.Domain.NUMERIC;
+    }
+}

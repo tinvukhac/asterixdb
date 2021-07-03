@@ -17,4 +17,13 @@
  * under the License.
  */
 
-uuid('12345'); // Invalid length
+SET `compiler.arrayindex` "true";
+USE TestYelp;
+
+FROM     YelpCheckinDateMarkers M
+LEFT OUTER JOIN (
+    FROM    YelpCheckin C, C.checkin_times.dates CD
+    SELECT  VALUE CD
+)        AS D ON D /*+ indexnl */ = M.datetime
+SELECT   COUNT(*);
+

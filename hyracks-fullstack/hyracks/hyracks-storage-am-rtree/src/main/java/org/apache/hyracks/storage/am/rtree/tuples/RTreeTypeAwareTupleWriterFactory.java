@@ -27,7 +27,7 @@ public class RTreeTypeAwareTupleWriterFactory extends TypeAwareTupleWriterFactor
     private static final long serialVersionUID = 1L;
 
     public RTreeTypeAwareTupleWriterFactory(ITypeTraits[] typeTraits) {
-        super(typeTraits);
+        super(typeTraits, null, null);
     }
 
     @Override
