@@ -89,32 +89,33 @@ public class IntervalJoinUtils {
         AbstractFunctionCallExpression funcExpr = (AbstractFunctionCallExpression) joinCondition;
         FunctionIdentifier fi = IntervalJoinUtils.isIntervalJoinCondition(funcExpr, varsLeft, varsRight, sideLeft,
                 sideRight, left, right);
-        if (fi != null) {
-            // Existing workflow for interval merge join
-            RangeAnnotation rangeAnnotation = IntervalJoinUtils.findRangeAnnotation(funcExpr);
-            if (rangeAnnotation == null) {
-                return false;
-            }
-            //Check RangeMap type
-            RangeMap rangeMap = rangeAnnotation.getRangeMap();
-            if (rangeMap.getTag(0, 0) != ATypeTag.DATETIME.serialize()
-                    && rangeMap.getTag(0, 0) != ATypeTag.DATE.serialize()
-                    && rangeMap.getTag(0, 0) != ATypeTag.TIME.serialize()) {
-                IWarningCollector warningCollector = context.getWarningCollector();
-                if (warningCollector.shouldWarn()) {
-                    warningCollector.warn(Warning.of(op.getSourceLocation(),
-                            org.apache.hyracks.api.exceptions.ErrorCode.INAPPLICABLE_HINT,
-                            "Date, DateTime, and Time are only range hints types supported for interval joins"));
-                }
-                return false;
-            }
-            IntervalPartitions intervalPartitions = IntervalJoinUtils.createIntervalPartitions(op, fi, sideLeft,
-                    sideRight, rangeMap, context, left, right);
-            IntervalJoinUtils.setSortMergeIntervalJoinOp(op, fi, sideLeft, sideRight, context, intervalPartitions);
-            return true;
-        } else {
+        if (fi == null) {
             return false;
         }
+
+        // Existing workflow for interval merge join
+        RangeAnnotation rangeAnnotation = IntervalJoinUtils.findRangeAnnotation(funcExpr);
+        if (rangeAnnotation == null) {
+            return false;
+        }
+
+        //Check RangeMap type
+        RangeMap rangeMap = rangeAnnotation.getRangeMap();
+        if (rangeMap.getTag(0, 0) != ATypeTag.DATETIME.serialize()
+            && rangeMap.getTag(0, 0) != ATypeTag.DATE.serialize()
+            && rangeMap.getTag(0, 0) != ATypeTag.TIME.serialize()) {
+            IWarningCollector warningCollector = context.getWarningCollector();
+            if (warningCollector.shouldWarn()) {
+                warningCollector.warn(Warning.of(op.getSourceLocation(),
+                    org.apache.hyracks.api.exceptions.ErrorCode.INAPPLICABLE_HINT,
+                    "Date, DateTime, and Time are only range hints types supported for interval joins"));
+            }
+            return false;
+        }
+        IntervalPartitions intervalPartitions = IntervalJoinUtils.createIntervalPartitions(op, fi, sideLeft,
+            sideRight, rangeMap, context, left, right);
+        IntervalJoinUtils.setSortMergeIntervalJoinOp(op, fi, sideLeft, sideRight, context, intervalPartitions);
+        return true;
     }
 
     protected static RangeAnnotation findRangeAnnotation(AbstractFunctionCallExpression fexp) {
