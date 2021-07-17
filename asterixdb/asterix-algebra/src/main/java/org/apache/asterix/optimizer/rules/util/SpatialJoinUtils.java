@@ -63,7 +63,6 @@ import org.apache.hyracks.algebricks.core.algebra.operators.logical.ExchangeOper
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.InnerJoinOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.ProjectOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.ReplicateOperator;
-import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnionAllOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.UnnestOperator;
 import org.apache.hyracks.algebricks.core.algebra.operators.logical.visitors.VariableUtilities;
 import org.apache.hyracks.algebricks.core.algebra.operators.physical.AbstractJoinPOperator;
@@ -279,26 +278,55 @@ public class SpatialJoinUtils {
         MutableObject<ILogicalOperator> rightExchToJoinOpRef = rightMBRCalculator.third;
         LogicalVariable rightMBRVar = rightGlobalAggResultVars.get(0);
 
-        // Union the results of left and right aggregators to get the union MBR of both left and right input
-        LogicalVariable unionMBRVar = context.newVar();
-        Triple<LogicalVariable, LogicalVariable, LogicalVariable> unionVarMap =
-                new Triple<>(leftMBRVar, rightMBRVar, unionMBRVar);
-        List<Triple<LogicalVariable, LogicalVariable, LogicalVariable>> unionVarMaps = new ArrayList<>();
-        unionVarMaps.add(unionVarMap);
-        UnionAllOperator unionAllOperator = new UnionAllOperator(unionVarMaps);
-        unionAllOperator.setSourceLocation(op.getSourceLocation());
-        unionAllOperator.getInputs().add(new MutableObject<>(leftGlobalAgg.getValue()));
-        unionAllOperator.getInputs().add(new MutableObject<>(rightGlobalAgg.getValue()));
-        OperatorManipulationUtil.setOperatorMode(unionAllOperator);
-        unionAllOperator.recomputeSchema();
-        context.computeAndSetTypeEnvironmentForOperator(unionAllOperator);
-        MutableObject<ILogicalOperator> unionAllOperatorRef = new MutableObject<>(unionAllOperator);
+        // Join the left and right union MBR
+        Mutable<ILogicalExpression> trueCondition =
+            new MutableObject<>(new ConstantExpression(new AsterixConstantValue(ABoolean.TRUE)));
+        InnerJoinOperator unionMBRJoinOp = new InnerJoinOperator(trueCondition, leftGlobalAgg, rightGlobalAgg);
+        unionMBRJoinOp.setPhysicalOperator(new NestedLoopJoinPOperator(AbstractBinaryJoinOperator.JoinKind.INNER,
+            AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
+        MutableObject<ILogicalOperator> unionMBRJoinOpRef = new MutableObject<>(unionMBRJoinOp);
+        unionMBRJoinOp.recomputeSchema();
+        context.computeAndSetTypeEnvironmentForOperator(unionMBRJoinOp);
 
-        // Compute the union MBR of the left and the right MBR
-        Pair<MutableObject<ILogicalOperator>, List<LogicalVariable>> globalAggregateOperator =
-                createGlobalAggregateOperator(op, context, unionMBRVar, unionAllOperatorRef);
-        MutableObject<ILogicalOperator> globalAgg = globalAggregateOperator.getFirst();
-        LogicalVariable unionMBR = globalAggregateOperator.getSecond().get(0);
+        // Compute the intersection rectangle of left MBR and right MBR
+        List<Mutable<ILogicalExpression>> inputMBRs = new ArrayList<>();
+        inputMBRs.add(new MutableObject<>(new VariableReferenceExpression(leftMBRVar)));
+        inputMBRs.add(new MutableObject<>(new VariableReferenceExpression(rightMBRVar)));
+        ScalarFunctionCallExpression getIntersectionFuncExpr = new ScalarFunctionCallExpression(
+                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.GET_INTERSECTION), inputMBRs);
+        Mutable<ILogicalExpression> intersectionMBRExpr = new MutableObject<>(getIntersectionFuncExpr);
+        LogicalVariable unionMBR = context.newVar();
+        AbstractLogicalOperator assignOperator = new AssignOperator(unionMBR, intersectionMBRExpr);
+        assignOperator.setSourceLocation(op.getSourceLocation());
+        assignOperator.setExecutionMode(op.getExecutionMode());
+        assignOperator.setPhysicalOperator(new AssignPOperator());
+        assignOperator.getInputs().add(new MutableObject<>(unionMBRJoinOpRef.getValue()));
+//        assignOperator.getInputs().add(new MutableObject<>(leftGlobalAgg.getValue()));
+//        assignOperator.getInputs().add(new MutableObject<>(rightGlobalAgg.getValue()));
+        context.computeAndSetTypeEnvironmentForOperator(assignOperator);
+        assignOperator.recomputeSchema();
+        MutableObject<ILogicalOperator> globalAgg = new MutableObject<>(assignOperator);
+
+        // Union the results of left and right aggregators to get the union MBR of both left and right input
+        //        LogicalVariable unionMBRVar = context.newVar();
+        //        Triple<LogicalVariable, LogicalVariable, LogicalVariable> unionVarMap =
+        //                new Triple<>(leftMBRVar, rightMBRVar, unionMBRVar);
+        //        List<Triple<LogicalVariable, LogicalVariable, LogicalVariable>> unionVarMaps = new ArrayList<>();
+        //        unionVarMaps.add(unionVarMap);
+        //        UnionAllOperator unionAllOperator = new UnionAllOperator(unionVarMaps);
+        //        unionAllOperator.setSourceLocation(op.getSourceLocation());
+        //        unionAllOperator.getInputs().add(new MutableObject<>(leftGlobalAgg.getValue()));
+        //        unionAllOperator.getInputs().add(new MutableObject<>(rightGlobalAgg.getValue()));
+        //        OperatorManipulationUtil.setOperatorMode(unionAllOperator);
+        //        unionAllOperator.recomputeSchema();
+        //        context.computeAndSetTypeEnvironmentForOperator(unionAllOperator);
+        //        MutableObject<ILogicalOperator> unionAllOperatorRef = new MutableObject<>(unionAllOperator);
+        //
+        //        // Compute the union MBR of the left and the right MBR
+        //        Pair<MutableObject<ILogicalOperator>, List<LogicalVariable>> globalAggregateOperator =
+        //                createGlobalAggregateOperator(op, context, unionMBRVar, unionAllOperatorRef);
+        //        MutableObject<ILogicalOperator> globalAgg = globalAggregateOperator.getFirst();
+        //        LogicalVariable unionMBR = globalAggregateOperator.getSecond().get(0);
 
         // Replicate the union MBR to left and right nested loop join(NLJ) operator, and another NLJ for reference point test
         ReplicateOperator unionMBRReplicateOperator =
