@@ -218,17 +218,17 @@ public class SpatialJoinUtils {
             List<Mutable<ILogicalExpression>> conditionExprs, Mutable<ILogicalOperator> leftInputOp,
             Mutable<ILogicalOperator> rightInputOp, LogicalVariable leftInputVar, LogicalVariable rightInputVar,
             SpatialJoinAnnotation spatialJoinAnn) throws AlgebricksException {
-        Mutable<ILogicalExpression> leftUnionMBRExpr = createRectangleExpression(spatialJoinAnn);
-        Mutable<ILogicalExpression> rightUnionMBRExpr = createRectangleExpression(spatialJoinAnn);
+        Mutable<ILogicalExpression> leftIntersectionMBRExpr = createRectangleExpression(spatialJoinAnn);
+        Mutable<ILogicalExpression> rightIntersectionMBRExpr = createRectangleExpression(spatialJoinAnn);
         Mutable<ILogicalExpression> referencePointTestMBRExpr = createRectangleExpression(spatialJoinAnn);
         int numRows = spatialJoinAnn.getNumRows();
         int numColumns = spatialJoinAnn.getNumColumns();
 
         // Inject unnest operator to add tile ID to the left and right branch of the join operator
         LogicalVariable leftTileIdVar = SpatialJoinUtils.injectSpatialTileUnnestOperator(context, leftInputOp,
-                leftInputVar, leftUnionMBRExpr, numRows, numColumns);
+                leftInputVar, leftIntersectionMBRExpr, numRows, numColumns);
         LogicalVariable rightTileIdVar = SpatialJoinUtils.injectSpatialTileUnnestOperator(context, rightInputOp,
-                rightInputVar, rightUnionMBRExpr, numRows, numColumns);
+                rightInputVar, rightIntersectionMBRExpr, numRows, numColumns);
 
         // The reference point test condition is considered as a part of spatial join conditions if a hint is provided.
         ScalarFunctionCallExpression referenceIdEquiJoinCondition = createReferencePointTestCondition(
@@ -280,84 +280,62 @@ public class SpatialJoinUtils {
 
         // Join the left and right union MBR
         Mutable<ILogicalExpression> trueCondition =
-            new MutableObject<>(new ConstantExpression(new AsterixConstantValue(ABoolean.TRUE)));
+                new MutableObject<>(new ConstantExpression(new AsterixConstantValue(ABoolean.TRUE)));
         InnerJoinOperator unionMBRJoinOp = new InnerJoinOperator(trueCondition, leftGlobalAgg, rightGlobalAgg);
         unionMBRJoinOp.setPhysicalOperator(new NestedLoopJoinPOperator(AbstractBinaryJoinOperator.JoinKind.INNER,
-            AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
+                AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
         MutableObject<ILogicalOperator> unionMBRJoinOpRef = new MutableObject<>(unionMBRJoinOp);
         unionMBRJoinOp.recomputeSchema();
         context.computeAndSetTypeEnvironmentForOperator(unionMBRJoinOp);
 
         // Compute the intersection rectangle of left MBR and right MBR
-        List<Mutable<ILogicalExpression>> inputMBRs = new ArrayList<>();
-        inputMBRs.add(new MutableObject<>(new VariableReferenceExpression(leftMBRVar)));
-        inputMBRs.add(new MutableObject<>(new VariableReferenceExpression(rightMBRVar)));
+        List<Mutable<ILogicalExpression>> getIntersectionFuncInputExprs = new ArrayList<>();
+        getIntersectionFuncInputExprs.add(new MutableObject<>(new VariableReferenceExpression(leftMBRVar)));
+        getIntersectionFuncInputExprs.add(new MutableObject<>(new VariableReferenceExpression(rightMBRVar)));
         ScalarFunctionCallExpression getIntersectionFuncExpr = new ScalarFunctionCallExpression(
-                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.GET_INTERSECTION), inputMBRs);
-        Mutable<ILogicalExpression> intersectionMBRExpr = new MutableObject<>(getIntersectionFuncExpr);
-        LogicalVariable unionMBR = context.newVar();
-        AbstractLogicalOperator assignOperator = new AssignOperator(unionMBR, intersectionMBRExpr);
-        assignOperator.setSourceLocation(op.getSourceLocation());
-        assignOperator.setExecutionMode(op.getExecutionMode());
-        assignOperator.setPhysicalOperator(new AssignPOperator());
-        assignOperator.getInputs().add(new MutableObject<>(unionMBRJoinOpRef.getValue()));
-//        assignOperator.getInputs().add(new MutableObject<>(leftGlobalAgg.getValue()));
-//        assignOperator.getInputs().add(new MutableObject<>(rightGlobalAgg.getValue()));
-        context.computeAndSetTypeEnvironmentForOperator(assignOperator);
-        assignOperator.recomputeSchema();
-        MutableObject<ILogicalOperator> globalAgg = new MutableObject<>(assignOperator);
+                BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.GET_INTERSECTION), getIntersectionFuncInputExprs);
 
-        // Union the results of left and right aggregators to get the union MBR of both left and right input
-        //        LogicalVariable unionMBRVar = context.newVar();
-        //        Triple<LogicalVariable, LogicalVariable, LogicalVariable> unionVarMap =
-        //                new Triple<>(leftMBRVar, rightMBRVar, unionMBRVar);
-        //        List<Triple<LogicalVariable, LogicalVariable, LogicalVariable>> unionVarMaps = new ArrayList<>();
-        //        unionVarMaps.add(unionVarMap);
-        //        UnionAllOperator unionAllOperator = new UnionAllOperator(unionVarMaps);
-        //        unionAllOperator.setSourceLocation(op.getSourceLocation());
-        //        unionAllOperator.getInputs().add(new MutableObject<>(leftGlobalAgg.getValue()));
-        //        unionAllOperator.getInputs().add(new MutableObject<>(rightGlobalAgg.getValue()));
-        //        OperatorManipulationUtil.setOperatorMode(unionAllOperator);
-        //        unionAllOperator.recomputeSchema();
-        //        context.computeAndSetTypeEnvironmentForOperator(unionAllOperator);
-        //        MutableObject<ILogicalOperator> unionAllOperatorRef = new MutableObject<>(unionAllOperator);
-        //
-        //        // Compute the union MBR of the left and the right MBR
-        //        Pair<MutableObject<ILogicalOperator>, List<LogicalVariable>> globalAggregateOperator =
-        //                createGlobalAggregateOperator(op, context, unionMBRVar, unionAllOperatorRef);
-        //        MutableObject<ILogicalOperator> globalAgg = globalAggregateOperator.getFirst();
-        //        LogicalVariable unionMBR = globalAggregateOperator.getSecond().get(0);
+        Mutable<ILogicalExpression> intersectionMBRExpr = new MutableObject<>(getIntersectionFuncExpr);
+        LogicalVariable intersectionMBR = context.newVar();
+        AbstractLogicalOperator intersectionMBRAssignOperator = new AssignOperator(intersectionMBR, intersectionMBRExpr);
+        intersectionMBRAssignOperator.setSourceLocation(op.getSourceLocation());
+        intersectionMBRAssignOperator.setExecutionMode(op.getExecutionMode());
+        intersectionMBRAssignOperator.setPhysicalOperator(new AssignPOperator());
+        intersectionMBRAssignOperator.getInputs().add(new MutableObject<>(unionMBRJoinOpRef.getValue()));
+        context.computeAndSetTypeEnvironmentForOperator(intersectionMBRAssignOperator);
+        intersectionMBRAssignOperator.recomputeSchema();
+        MutableObject<ILogicalOperator> intersectionMBRAssignOperatorRef = new MutableObject<>(intersectionMBRAssignOperator);
 
         // Replicate the union MBR to left and right nested loop join(NLJ) operator, and another NLJ for reference point test
-        ReplicateOperator unionMBRReplicateOperator =
-                createReplicateOperator(globalAgg, context, op.getSourceLocation(), 3);
+        ReplicateOperator intersectionMBRReplicateOperator =
+                createReplicateOperator(intersectionMBRAssignOperatorRef, context, op.getSourceLocation(), 3);
 
         // Replicate union MBR to the left branch
-        ExchangeOperator exchMBRToJoinOpLeft = createBroadcastExchangeOp(unionMBRReplicateOperator, context);
+        ExchangeOperator exchMBRToJoinOpLeft = createBroadcastExchangeOp(intersectionMBRReplicateOperator, context);
         MutableObject<ILogicalOperator> exchMBRToJoinOpLeftRef = new MutableObject<>(exchMBRToJoinOpLeft);
         Pair<LogicalVariable, Mutable<ILogicalOperator>> createLeftAssignProjectOperatorResult =
-                createAssignProjectOperator(op, unionMBR, unionMBRReplicateOperator, exchMBRToJoinOpLeftRef, context);
-        LogicalVariable leftUnionMBRVar = createLeftAssignProjectOperatorResult.getFirst();
-        Mutable<ILogicalOperator> leftUnionMBRRef = createLeftAssignProjectOperatorResult.getSecond();
+                createAssignProjectOperator(op, intersectionMBR, intersectionMBRReplicateOperator, exchMBRToJoinOpLeftRef, context);
+        LogicalVariable leftIntersectionMBRVar = createLeftAssignProjectOperatorResult.getFirst();
+        Mutable<ILogicalOperator> leftIntersectionMBRRef = createLeftAssignProjectOperatorResult.getSecond();
 
         // Replicate union MBR to the right branch
-        ExchangeOperator exchMBRToJoinOpRight = createBroadcastExchangeOp(unionMBRReplicateOperator, context);
+        ExchangeOperator exchMBRToJoinOpRight = createBroadcastExchangeOp(intersectionMBRReplicateOperator, context);
         MutableObject<ILogicalOperator> exchMBRToJoinOpRightRef = new MutableObject<>(exchMBRToJoinOpRight);
         Pair<LogicalVariable, Mutable<ILogicalOperator>> createRightAssignProjectOperatorResult =
-                createAssignProjectOperator(op, unionMBR, unionMBRReplicateOperator, exchMBRToJoinOpRightRef, context);
-        LogicalVariable rightUnionMBRVar = createRightAssignProjectOperatorResult.getFirst();
-        Mutable<ILogicalOperator> rightUnionMBRRef = createRightAssignProjectOperatorResult.getSecond();
+                createAssignProjectOperator(op, intersectionMBR, intersectionMBRReplicateOperator, exchMBRToJoinOpRightRef, context);
+        LogicalVariable rightIntersectionMBRVar = createRightAssignProjectOperatorResult.getFirst();
+        Mutable<ILogicalOperator> rightIntersectionMBRRef = createRightAssignProjectOperatorResult.getSecond();
 
         // Replicate union MBR to the right branch of a later Nested Loop Join reference point test
         ExchangeOperator exchMBRToReferencePointTestJoinOp =
-                createBroadcastExchangeOp(unionMBRReplicateOperator, context);
+                createBroadcastExchangeOp(intersectionMBRReplicateOperator, context);
         MutableObject<ILogicalOperator> exchMBRToReferencePointTestJoinOpRef =
                 new MutableObject<>(exchMBRToReferencePointTestJoinOp);
 
         // Add left Join (TRUE)
         Mutable<ILogicalExpression> leftTrueCondition =
                 new MutableObject<>(new ConstantExpression(new AsterixConstantValue(ABoolean.TRUE)));
-        InnerJoinOperator leftJoinOp = new InnerJoinOperator(leftTrueCondition, leftExchToJoinOpRef, leftUnionMBRRef);
+        InnerJoinOperator leftJoinOp = new InnerJoinOperator(leftTrueCondition, leftExchToJoinOpRef, leftIntersectionMBRRef);
         leftJoinOp.setPhysicalOperator(new NestedLoopJoinPOperator(AbstractBinaryJoinOperator.JoinKind.INNER,
                 AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
         MutableObject<ILogicalOperator> leftJoinRef = new MutableObject<>(leftJoinOp);
@@ -369,7 +347,7 @@ public class SpatialJoinUtils {
         Mutable<ILogicalExpression> rightTrueCondition =
                 new MutableObject<>(new ConstantExpression(new AsterixConstantValue(ABoolean.TRUE)));
         InnerJoinOperator rightJoinOp =
-                new InnerJoinOperator(rightTrueCondition, rightExchToJoinOpRef, rightUnionMBRRef);
+                new InnerJoinOperator(rightTrueCondition, rightExchToJoinOpRef, rightIntersectionMBRRef);
         rightJoinOp.setPhysicalOperator(new NestedLoopJoinPOperator(AbstractBinaryJoinOperator.JoinKind.INNER,
                 AbstractJoinPOperator.JoinPartitioningType.BROADCAST));
         MutableObject<ILogicalOperator> rightJoinRef = new MutableObject<>(rightJoinOp);
@@ -377,18 +355,18 @@ public class SpatialJoinUtils {
         context.computeAndSetTypeEnvironmentForOperator(rightJoinOp);
         rightInputOp.setValue(rightJoinRef.getValue());
 
-        Mutable<ILogicalExpression> leftUnionMBRExpr =
-                new MutableObject<>(new VariableReferenceExpression(leftUnionMBRVar));
-        Mutable<ILogicalExpression> rightUnionMBRExpr =
-                new MutableObject<>(new VariableReferenceExpression(rightUnionMBRVar));
+        Mutable<ILogicalExpression> leftIntersectionMBRExpr =
+                new MutableObject<>(new VariableReferenceExpression(leftIntersectionMBRVar));
+        Mutable<ILogicalExpression> rightIntersectionMBRExpr =
+                new MutableObject<>(new VariableReferenceExpression(rightIntersectionMBRVar));
         Mutable<ILogicalExpression> referencePointTestMBRExpr =
-                new MutableObject<>(new VariableReferenceExpression(unionMBR));
+                new MutableObject<>(new VariableReferenceExpression(intersectionMBR));
 
         // Inject unnest operator to add tile ID to the left and right branch of the join operator
         LogicalVariable leftTileIdVar = SpatialJoinUtils.injectSpatialTileUnnestOperator(context, leftInputOp,
-                leftInputVar, leftUnionMBRExpr, DEFAULT_ROWS, DEFAULT_COLUMNS);
+                leftInputVar, leftIntersectionMBRExpr, DEFAULT_ROWS, DEFAULT_COLUMNS);
         LogicalVariable rightTileIdVar = SpatialJoinUtils.injectSpatialTileUnnestOperator(context, rightInputOp,
-                rightInputVar, rightUnionMBRExpr, DEFAULT_ROWS, DEFAULT_COLUMNS);
+                rightInputVar, rightIntersectionMBRExpr, DEFAULT_ROWS, DEFAULT_COLUMNS);
 
         // Reference point test condition will be used as the condition of a Nested Loop Join operator after the
         // spatial join operator. This design allow us to use the union MBR (or summary of the join) efficiently,
@@ -468,7 +446,7 @@ public class SpatialJoinUtils {
     }
 
     private static Pair<LogicalVariable, Mutable<ILogicalOperator>> createAssignProjectOperator(
-            AbstractBinaryJoinOperator op, LogicalVariable inputVar, ReplicateOperator unionMBRReplicateOperator,
+            AbstractBinaryJoinOperator op, LogicalVariable inputVar, ReplicateOperator replicateOperator,
             MutableObject<ILogicalOperator> exchMBRToForwardRef, IOptimizationContext context)
             throws AlgebricksException {
         LogicalVariable newFinalMbrVar = context.newVar();
@@ -480,12 +458,12 @@ public class SpatialJoinUtils {
         Mutable<ILogicalExpression> finalMBRExpr = new MutableObject<>(new VariableReferenceExpression(inputVar));
         AbstractLogicalOperator assignOperator = new AssignOperator(newFinalMbrVar, finalMBRExpr);
         assignOperator.setSourceLocation(op.getSourceLocation());
-        assignOperator.setExecutionMode(unionMBRReplicateOperator.getExecutionMode());
+        assignOperator.setExecutionMode(replicateOperator.getExecutionMode());
         assignOperator.setPhysicalOperator(new AssignPOperator());
         AbstractLogicalOperator projectOperator = new ProjectOperator(finalMBRLiveVars);
         projectOperator.setSourceLocation(op.getSourceLocation());
         projectOperator.setPhysicalOperator(new StreamProjectPOperator());
-        projectOperator.setExecutionMode(unionMBRReplicateOperator.getExecutionMode());
+        projectOperator.setExecutionMode(replicateOperator.getExecutionMode());
         assignOperator.getInputs().add(exchMBRToForwardRef);
         projectOperator.getInputs().add(new MutableObject<ILogicalOperator>(assignOperator));
 
