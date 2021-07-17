@@ -190,14 +190,17 @@ public class FilterRefineSpatialJoinRuleForSTDistanceFunction implements IAlgebr
         ScalarFunctionCallExpression enlargedLeft = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR_ENLARGE), distanceFuncCallLeftArg,
                 new MutableObject<>(new ConstantExpression(distanceVar)));
+        enlargedLeft.setSourceLocation(distanceFuncCallLeftArg.getValue().getSourceLocation());
         // Compute the MBR of the right argument of the refine function (st_distance)
         ScalarFunctionCallExpression rightMBR = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.ST_MBR), distanceFuncCallRightArg);
+        rightMBR.setSourceLocation(distanceFuncCallRightArg.getValue().getSourceLocation());
 
         // Create filter function (spatial_intersect)
         ScalarFunctionCallExpression spatialIntersect = new ScalarFunctionCallExpression(
                 BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.SPATIAL_INTERSECT),
                 new MutableObject<>(enlargedLeft.cloneExpression()), new MutableObject<>(rightMBR.cloneExpression()));
+        spatialIntersect.setSourceLocation(op.getSourceLocation());
 
         // Attach the annotation to the spatial_intersect function if it is available
         if (distanceFuncCallExpr.getAnnotation(SpatialJoinAnnotation.class) != null)
@@ -207,6 +210,7 @@ public class FilterRefineSpatialJoinRuleForSTDistanceFunction implements IAlgebr
         ScalarFunctionCallExpression updatedJoinCondition =
                 new ScalarFunctionCallExpression(BuiltinFunctions.getBuiltinFunctionInfo(BuiltinFunctions.AND),
                         new MutableObject<>(spatialIntersect), new MutableObject<>(funcExpr));
+        updatedJoinCondition.setSourceLocation(op.getSourceLocation());
 
         joinConditionRef.setValue(updatedJoinCondition);
 

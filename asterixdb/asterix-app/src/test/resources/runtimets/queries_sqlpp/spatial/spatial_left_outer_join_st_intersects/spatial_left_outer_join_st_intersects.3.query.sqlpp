@@ -19,6 +19,6 @@
 
 USE test;
 
-FROM ParkSet AS ps LEFT OUTER JOIN LakeSet AS ls
-ON spatial_intersect(ps.geom, ls.geom)
+FROM ParkSetG AS ps LEFT OUTER JOIN LakeSetG AS ls
+ON st_intersects(ps.geom, ls.geom)
 SELECT COUNT(*);
