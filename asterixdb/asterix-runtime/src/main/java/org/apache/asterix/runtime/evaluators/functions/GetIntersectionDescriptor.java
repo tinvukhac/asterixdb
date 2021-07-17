@@ -72,7 +72,7 @@ public class GetIntersectionDescriptor extends AbstractScalarFunctionDynamicDesc
                     private final IScalarEvaluator eval1 = args[1].createScalarEvaluator(ctx);
 
                     private final AMutableRectangle aRectangle =
-                            new AMutableRectangle(new AMutablePoint(0, 0), new AMutablePoint(0, 0));
+                            new AMutableRectangle(new AMutablePoint(0.0, 0.0), new AMutablePoint(0.0, 0.0));
                     private final AMutablePoint[] aPoint = { new AMutablePoint(0, 0), new AMutablePoint(0, 0) };
 
                     @SuppressWarnings("unchecked")
@@ -136,15 +136,16 @@ public class GetIntersectionDescriptor extends AbstractScalarFunctionDynamicDesc
                         double ix2 = Math.min(ax2, bx2);
                         double iy2 = Math.min(ay2, by2);
 
-                        // Return default rectangle (0,0,0,0) if there is no intersection
+                        // Update the intersection rectangle.
+                        // If there is no intersection, return default rectangle [(0,0),(0,0)]
                         if ((ix1 < ix2) && (iy1 < iy2)) {
                             aPoint[0].setValue(ix1, iy1);
                             aPoint[1].setValue(ix2, iy2);
                             aRectangle.setValue(aPoint[0], aPoint[1]);
-                            resultStorage.reset();
-                            rectangleSerde.serialize(aRectangle, resultStorage.getDataOutput());
-                            result.set(resultStorage);
                         }
+                        resultStorage.reset();
+                        rectangleSerde.serialize(aRectangle, resultStorage.getDataOutput());
+                        result.set(resultStorage);
                     }
                 };
             }

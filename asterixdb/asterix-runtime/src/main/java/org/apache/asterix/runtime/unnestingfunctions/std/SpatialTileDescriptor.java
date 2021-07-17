@@ -27,12 +27,15 @@ import org.apache.asterix.dataflow.data.nontagged.serde.AInt64SerializerDeserial
 import org.apache.asterix.dataflow.data.nontagged.serde.ARectangleSerializerDeserializer;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.om.base.AMutableInt32;
+import org.apache.asterix.om.base.APoint;
+import org.apache.asterix.om.base.ARectangle;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.EnumDeserializer;
+import org.apache.asterix.runtime.evaluators.functions.spatial.SpatialLogic;
 import org.apache.asterix.runtime.exceptions.TypeMismatchException;
 import org.apache.asterix.runtime.unnestingfunctions.base.AbstractUnnestingFunctionDynamicDescriptor;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -156,29 +159,35 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
                         int rows = (int) AInt64SerializerDeserializer.getLong(bytes2, offset2 + 1);
                         int columns = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
 
-                        int row1 = (int) Math.ceil((y1 - minY) * rows / (maxY - minY));
-                        int col1 = (int) Math.ceil((x1 - minX) * columns / (maxX - minX));
-                        int row2 = (int) Math.ceil((y2 - minY) * rows / (maxY - minY));
-                        int col2 = (int) Math.ceil((x2 - minX) * columns / (maxX - minX));
-
-                        row1 = Math.min(Math.max(1, row1), rows * columns);
-                        col1 = Math.min(Math.max(1, col1), rows * columns);
-                        row2 = Math.min(Math.max(1, row2), rows * columns);
-                        col2 = Math.min(Math.max(1, col2), rows * columns);
-
-                        int minRow = Math.min(row1, row2);
-                        int maxRow = Math.max(row1, row2);
-                        int minCol = Math.min(col1, col2);
-                        int maxCol = Math.max(col1, col2);
-
+                        // Unnest iff two input datasets overlap, which means partitioning MBR is not [(0,0),(0,0)]
                         tileValues.clear();
-                        for (int i = minRow; i <= maxRow; i++) {
-                            for (int j = minCol; j <= maxCol; j++) {
-                                int tileId = (i - 1) * columns + j;
-                                tileValues.add(tileId);
+                        pos = 0;
+                        if (!((minX == 0.0) && (minY == 0.0) && (maxX == 0.0) && (maxY == 0.0))) {
+                            // Unnest iff the record overlaps with the partitioning MBR
+                            if (!((x1 > maxX) || (minX > x2) || (y1 > maxY) || (minY > y2))) {
+                                int row1 = (int) Math.ceil((y1 - minY) * rows / (maxY - minY));
+                                int col1 = (int) Math.ceil((x1 - minX) * columns / (maxX - minX));
+                                int row2 = (int) Math.ceil((y2 - minY) * rows / (maxY - minY));
+                                int col2 = (int) Math.ceil((x2 - minX) * columns / (maxX - minX));
+
+                                row1 = Math.min(Math.max(1, row1), rows * columns);
+                                col1 = Math.min(Math.max(1, col1), rows * columns);
+                                row2 = Math.min(Math.max(1, row2), rows * columns);
+                                col2 = Math.min(Math.max(1, col2), rows * columns);
+
+                                int minRow = Math.min(row1, row2);
+                                int maxRow = Math.max(row1, row2);
+                                int minCol = Math.min(col1, col2);
+                                int maxCol = Math.max(col1, col2);
+
+                                for (int i = minRow; i <= maxRow; i++) {
+                                    for (int j = minCol; j <= maxCol; j++) {
+                                        int tileId = (i - 1) * columns + j;
+                                        tileValues.add(tileId);
+                                    }
+                                }
                             }
                         }
-                        pos = 0;
                     }
 
                     @SuppressWarnings("unchecked")
