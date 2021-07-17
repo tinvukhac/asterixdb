@@ -9949,6 +9949,16 @@
         <output-dir compare="Text">spatial_join_dynamic_mbr</output-dir>
       </compilation-unit>
     </test-case>
+    <test-case FilePath="spatial">
+      <compilation-unit name="spatial_join_static_mbr">
+        <output-dir compare="Text">spatial_join_static_mbr</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="spatial">
+      <compilation-unit name="spatial_left_outer_join_dynamic_mbr">
+        <output-dir compare="Text">spatial_left_outer_join_dynamic_mbr</output-dir>
+      </compilation-unit>
+    </test-case>
   </test-group>
   <test-group name="statement-params">
     <test-case FilePath="statement-params">

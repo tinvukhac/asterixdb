@@ -19,5 +19,6 @@
 
 USE test;
 
-SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
-WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) */ spatial_intersect(ps.geom, ls.geom);
+FROM ParkSet AS ps LEFT OUTER JOIN LakeSet AS ls
+ON spatial_intersect(ps.geom, ls.geom)
+SELECT COUNT(*);

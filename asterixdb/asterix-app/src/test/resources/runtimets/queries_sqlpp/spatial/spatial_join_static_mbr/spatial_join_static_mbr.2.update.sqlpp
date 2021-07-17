@@ -16,8 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-USE test;
-
-SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
-WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) */ spatial_intersect(ps.geom, ls.geom);
