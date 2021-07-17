@@ -118,7 +118,7 @@ public class SpatialJoinUtils {
             return false;
         }
 
-        // We only apply optimization process for spatial join if the join annotation (hint) is provided
+        // Apply the PBSM join algorithm with/without hint
         SpatialJoinAnnotation spatialJoinAnn = spatialJoinFuncExpr.getAnnotation(SpatialJoinAnnotation.class);
         SpatialJoinUtils.updateJoinPlan(op, spatialJoinFuncExpr, conditionExprs, spatialJoinAnn, context, left, right);
         return true;
@@ -204,7 +204,7 @@ public class SpatialJoinUtils {
             rightInputVar = spatialJoinVar0;
         }
 
-        // If the hint is not provided, the union MBR of two inputs will be computed on the run time
+        // If the hint is not provided, the intersection MBR of two inputs will be computed on the run time
         if (spatialJoinAnn == null) {
             buildSpatialJoinPlanWithDynamicMbr(op, context, conditionExprs, leftInputOp, rightInputOp, leftInputVar,
                     rightInputVar);
