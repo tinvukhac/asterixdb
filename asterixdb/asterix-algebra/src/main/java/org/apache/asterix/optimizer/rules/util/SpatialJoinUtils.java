@@ -120,8 +120,7 @@ public class SpatialJoinUtils {
 
         // Apply the PBSM join algorithm with/without hint
         SpatialJoinAnnotation spatialJoinAnn = spatialJoinFuncExpr.getAnnotation(SpatialJoinAnnotation.class);
-        SpatialJoinUtils.updateJoinPlan(op, spatialJoinFuncExpr, conditionExprs, spatialJoinAnn, context, left, right);
-        return true;
+        return SpatialJoinUtils.updateJoinPlan(op, spatialJoinFuncExpr, conditionExprs, spatialJoinAnn, context, left, right);
     }
 
     private static void setSpatialJoinOp(AbstractBinaryJoinOperator op, List<LogicalVariable> keysLeftBranch,
@@ -155,14 +154,14 @@ public class SpatialJoinUtils {
         return tileIdVar;
     }
 
-    protected static void updateJoinPlan(AbstractBinaryJoinOperator op,
+    protected static boolean updateJoinPlan(AbstractBinaryJoinOperator op,
             AbstractFunctionCallExpression spatialJoinFuncExpr, List<Mutable<ILogicalExpression>> conditionExprs,
             SpatialJoinAnnotation spatialJoinAnn, IOptimizationContext context, int LEFT, int RIGHT)
             throws AlgebricksException {
         // Extracts spatial intersect function's arguments
         List<Mutable<ILogicalExpression>> spatialJoinArgs = spatialJoinFuncExpr.getArguments();
         if (spatialJoinArgs.size() != 2) {
-            return;
+            return false;
         }
 
         ILogicalExpression spatialJoinLeftArg = spatialJoinArgs.get(LEFT).getValue();
@@ -171,7 +170,7 @@ public class SpatialJoinUtils {
         // Left and right arguments of the spatial_intersect function should be variables
         if (spatialJoinLeftArg.getExpressionTag() != LogicalExpressionTag.VARIABLE
                 || spatialJoinRightArg.getExpressionTag() != LogicalExpressionTag.VARIABLE) {
-            return;
+            return false;
         }
 
         // We only apply this rule if the arguments of spatial_intersect are ARectangle
@@ -181,7 +180,7 @@ public class SpatialJoinUtils {
         IAType rightType = (IAType) context.getExpressionTypeComputer().getType(spatialJoinRightArg,
                 context.getMetadataProvider(), typeEnvironment);
         if ((leftType != BuiltinType.ARECTANGLE) || (rightType != BuiltinType.ARECTANGLE)) {
-            return;
+            return false;
         }
 
         // Gets both input branches of the spatial join.
@@ -212,6 +211,8 @@ public class SpatialJoinUtils {
             buildSpatialJoinPlanWithStaticMbr(op, context, conditionExprs, leftInputOp, rightInputOp, leftInputVar,
                     rightInputVar, spatialJoinAnn);
         }
+
+        return true;
     }
 
     private static void buildSpatialJoinPlanWithStaticMbr(AbstractBinaryJoinOperator op, IOptimizationContext context,
