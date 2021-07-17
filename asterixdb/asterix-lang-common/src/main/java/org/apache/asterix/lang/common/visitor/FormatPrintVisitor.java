@@ -39,6 +39,7 @@ import org.apache.asterix.lang.common.base.Literal;
 import org.apache.asterix.lang.common.clause.LetClause;
 import org.apache.asterix.lang.common.clause.LimitClause;
 import org.apache.asterix.lang.common.clause.OrderbyClause;
+import org.apache.asterix.lang.common.clause.OrderbyClause.NullOrderModifier;
 import org.apache.asterix.lang.common.clause.OrderbyClause.OrderModifier;
 import org.apache.asterix.lang.common.clause.UpdateClause;
 import org.apache.asterix.lang.common.clause.WhereClause;
@@ -76,6 +77,7 @@ import org.apache.asterix.lang.common.statement.CreateFunctionStatement;
 import org.apache.asterix.lang.common.statement.CreateIndexStatement;
 import org.apache.asterix.lang.common.statement.CreateLibraryStatement;
 import org.apache.asterix.lang.common.statement.CreateSynonymStatement;
+import org.apache.asterix.lang.common.statement.CreateViewStatement;
 import org.apache.asterix.lang.common.statement.DatasetDecl;
 import org.apache.asterix.lang.common.statement.DataverseDecl;
 import org.apache.asterix.lang.common.statement.DataverseDropStatement;
@@ -104,6 +106,8 @@ import org.apache.asterix.lang.common.statement.SynonymDropStatement;
 import org.apache.asterix.lang.common.statement.TypeDecl;
 import org.apache.asterix.lang.common.statement.TypeDropStatement;
 import org.apache.asterix.lang.common.statement.UpdateStatement;
+import org.apache.asterix.lang.common.statement.ViewDecl;
+import org.apache.asterix.lang.common.statement.ViewDropStatement;
 import org.apache.asterix.lang.common.statement.WriteStatement;
 import org.apache.asterix.lang.common.struct.Identifier;
 import org.apache.asterix.lang.common.struct.OperatorType;
@@ -314,7 +318,7 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
     @Override
     public Void visit(OrderbyClause oc, Integer step) throws CompilationException {
         out.print(skip(step) + "order by ");
-        printDelimitedObyExpressions(oc.getOrderbyList(), oc.getModifierList(), step);
+        printDelimitedObyExpressions(oc.getOrderbyList(), oc.getModifierList(), oc.getNullModifierList(), step);
         out.println();
         return null;
     }
@@ -957,6 +961,32 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
         return null;
     }
 
+    @Override
+    public Void visit(CreateViewStatement cvs, Integer step) throws CompilationException {
+        out.print(skip(step) + CREATE + generateOrReplace(cvs.getReplaceIfExists()) + " view ");
+        out.print(generateIfNotExists(cvs.getIfNotExists()));
+        out.print(generateFullName(cvs.getDataverseName(), cvs.getViewName()));
+        out.print(" as ");
+        out.print(cvs.getViewBody());
+        out.println(SEMICOLON);
+        return null;
+    }
+
+    @Override
+    public Void visit(ViewDropStatement vds, Integer step) throws CompilationException {
+        out.print(skip(step) + "drop view ");
+        out.print(generateFullName(vds.getDataverseName(), vds.getViewName()));
+        out.print(generateIfExists(vds.getIfExists()));
+        out.println(SEMICOLON);
+        return null;
+    }
+
+    @Override
+    public Void visit(ViewDecl vd, Integer arg) throws CompilationException {
+        // this statement is internal
+        return null;
+    }
+
     protected void printConfiguration(Map<String, String> properties) {
         if (properties.size() > 0) {
             out.print("(");
@@ -1008,8 +1038,8 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
         }
     }
 
-    protected void printDelimitedObyExpressions(List<Expression> list, List<OrderModifier> mlist, Integer step)
-            throws CompilationException {
+    protected void printDelimitedObyExpressions(List<Expression> list, List<OrderModifier> mlist,
+            List<NullOrderModifier> nlist, Integer step) throws CompilationException {
         int index = 0;
         int size = list.size();
         for (Expression expr : list) {
@@ -1017,6 +1047,11 @@ public abstract class FormatPrintVisitor implements ILangVisitor<Void, Integer> 
             OrderModifier orderModifier = mlist.get(index);
             if (orderModifier != OrderModifier.ASC) {
                 out.print(orderModifier.toString().toLowerCase());
+            }
+            NullOrderModifier nullModifier = nlist.get(index);
+            if (nullModifier != null) {
+                out.print(" nulls ");
+                out.print(nullModifier.toString().toLowerCase());
             }
             if (++index < size) {
                 out.print(COMMA);
