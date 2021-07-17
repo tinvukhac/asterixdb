@@ -35,11 +35,9 @@ CREATE TYPE LakeType as closed {
 
 -- Make Park dataset
 CREATE DATASET ParkSet (ParkType) primary key id;
-LOAD DATASET ParkSet USING localfs((`path`=`asterix_nc1://data/spatial/parks.json`),(`format`=`adm`));
 
 -- Make Lake dataset
 CREATE DATASET LakeSet (LakeType) primary key id;
-LOAD DATASET LakeSet USING localfs((`path`=`asterix_nc1://data/spatial/lakes.json`),(`format`=`adm`));
 
 -- Type for the geometry datasets
 CREATE TYPE GeomType AS{
@@ -50,7 +48,3 @@ CREATE TYPE GeomType AS{
 -- Create datasets
 CREATE DATASET ParkSetG (GeomType) primary key id;
 CREATE DATASET LakeSetG (GeomType) primary key id;
-
--- make geometries and insert into new datasets
-insert into LakeSetG select id, st_make_envelope(get_x (get_points (geom)[0]) ,get_y (get_points (geom)[0]) ,get_x (get_points (geom)[1]) ,get_y (get_points (geom)[1]) , 4326) geom from LakeSet;
-insert into ParkSetG select id, st_make_envelope(get_x (get_points (geom)[0]) ,get_y (get_points (geom)[0]) ,get_x (get_points (geom)[1]) ,get_y (get_points (geom)[1]) , 4326) geom from ParkSet;

@@ -16,3 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+LOAD DATASET ParkSet USING localfs((`path`=`asterix_nc1://data/spatial/parks.json`),(`format`=`adm`));
+LOAD DATASET LakeSet USING localfs((`path`=`asterix_nc1://data/spatial/lakes.json`),(`format`=`adm`));

@@ -16,3 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+LOAD DATASET ParkSet USING localfs((`path`=`asterix_nc1://data/spatial/parks.json`),(`format`=`adm`));
+LOAD DATASET LakeSet USING localfs((`path`=`asterix_nc1://data/spatial/lakes.json`),(`format`=`adm`));
+-- make geometries and insert into new datasets
+insert into LakeSetG select id, st_make_envelope(get_x (get_points (geom)[0]) ,get_y (get_points (geom)[0]) ,get_x (get_points (geom)[1]) ,get_y (get_points (geom)[1]) , 4326) geom from LakeSet;
+insert into ParkSetG select id, st_make_envelope(get_x (get_points (geom)[0]) ,get_y (get_points (geom)[0]) ,get_x (get_points (geom)[1]) ,get_y (get_points (geom)[1]) , 4326) geom from ParkSet;
