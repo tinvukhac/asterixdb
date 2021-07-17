@@ -21,13 +21,15 @@ package org.apache.asterix.geo.evaluators.functions;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.apache.asterix.dataflow.data.nontagged.serde.ADoubleSerializerDeserializer;
 import org.apache.asterix.dataflow.data.nontagged.serde.AGeometrySerializerDeserializer;
-import org.apache.asterix.dataflow.data.nontagged.serde.AInt64SerializerDeserializer;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.BuiltinType;
+import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.evaluators.base.AbstractScalarFunctionDynamicDescriptor;
 import org.apache.asterix.runtime.evaluators.functions.PointableHelper;
 import org.apache.asterix.runtime.exceptions.InvalidDataFormatException;
@@ -49,7 +51,7 @@ public abstract class AbstractSTGeometryDoubleNDescriptor extends AbstractScalar
 
     private static final long serialVersionUID = 1L;
 
-    abstract protected Object evaluateOGCGeometry(OGCGeometry geometry, double n) throws HyracksDataException;
+    abstract protected Object evaluateOGCGeometry(OGCGeometry geometry, double value) throws HyracksDataException;
 
     @Override
     public IScalarEvaluatorFactory createEvaluatorFactory(final IScalarEvaluatorFactory[] args) {
@@ -65,6 +67,11 @@ public abstract class AbstractSTGeometryDoubleNDescriptor extends AbstractScalar
     }
 
     private class AbstractSTGeometryDoubleNEvaluator implements IScalarEvaluator {
+
+        private final Byte[] NUMERIC_TYPES = new Byte[] { ATypeTag.SERIALIZED_INT8_TYPE_TAG,
+            ATypeTag.SERIALIZED_INT16_TYPE_TAG, ATypeTag.SERIALIZED_INT32_TYPE_TAG, ATypeTag.SERIALIZED_INT64_TYPE_TAG,
+            ATypeTag.SERIALIZED_FLOAT_TYPE_TAG, ATypeTag.SERIALIZED_DOUBLE_TYPE_TAG };
+        private final Set<Byte> NUMERIC_TYPE_SET = new HashSet<>(Arrays.asList(NUMERIC_TYPES));
 
         private ArrayBackedValueStorage resultStorage;
         private DataOutput out;
@@ -117,11 +124,9 @@ public abstract class AbstractSTGeometryDoubleNDescriptor extends AbstractScalar
             inStream.setContent(data0, offset0 + 1, len - 1);
             OGCGeometry geometry = AGeometrySerializerDeserializer.INSTANCE.deserialize(dataIn).getGeometry();
             Object finalResult;
-            if (data1[offset1] == ATypeTag.SERIALIZED_DOUBLE_TYPE_TAG) {
-                finalResult =
-                        evaluateOGCGeometry(geometry, ADoubleSerializerDeserializer.getDouble(data1, offset1 + 1));
-            } else if (data1[offset1] == ATypeTag.SERIALIZED_INT64_TYPE_TAG) {
-                finalResult = evaluateOGCGeometry(geometry, AInt64SerializerDeserializer.getLong(data1, offset1 + 1));
+            if (NUMERIC_TYPE_SET.contains(data1[offset1])) {
+                double value = ATypeHierarchy.getDoubleValue(getIdentifier().getName(), 0, data1, offset1);
+                finalResult = evaluateOGCGeometry(geometry, value);
             } else {
                 throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, data1[offset1],
                         ATypeTag.SERIALIZED_DOUBLE_TYPE_TAG);

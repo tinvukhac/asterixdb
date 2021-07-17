@@ -46,10 +46,10 @@ public class STMBREnlargeDescriptor extends AbstractSTGeometryDoubleNDescriptor 
     }
 
     @Override
-    protected Object evaluateOGCGeometry(OGCGeometry geometry, double n) throws HyracksDataException {
+    protected Object evaluateOGCGeometry(OGCGeometry geometry, double value) throws HyracksDataException {
         Envelope env = new Envelope();
         geometry.getEsriGeometry().queryEnvelope(env);
-        return new AMutableRectangle(new AMutablePoint(env.getXMin() - n, env.getYMin() - n),
-                new AMutablePoint(env.getXMax() + n, env.getYMax() + n));
+        return new AMutableRectangle(new AMutablePoint(env.getXMin() - value, env.getYMin() - value),
+                new AMutablePoint(env.getXMax() + value, env.getYMax() + value));
     }
 }
