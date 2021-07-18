@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.apache.asterix.dataflow.data.nontagged.Coordinate;
 import org.apache.asterix.dataflow.data.nontagged.serde.ADoubleSerializerDeserializer;
-import org.apache.asterix.dataflow.data.nontagged.serde.AInt64SerializerDeserializer;
 import org.apache.asterix.dataflow.data.nontagged.serde.ARectangleSerializerDeserializer;
 import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
 import org.apache.asterix.om.base.AMutableInt32;
@@ -74,9 +73,8 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
 
             private static final long serialVersionUID = 1L;
 
-            private final ATypeTag[] INT_TYPES =
-                new ATypeTag[] { ATypeTag.TINYINT, ATypeTag.SMALLINT, ATypeTag.INTEGER, ATypeTag.BIGINT,
-                    ATypeTag.UINT8, ATypeTag.UINT16, ATypeTag.UINT32, ATypeTag.UINT64};
+            private final ATypeTag[] INT_TYPES = new ATypeTag[] { ATypeTag.TINYINT, ATypeTag.SMALLINT, ATypeTag.INTEGER,
+                    ATypeTag.BIGINT, ATypeTag.UINT8, ATypeTag.UINT16, ATypeTag.UINT32, ATypeTag.UINT64 };
             private final Set<ATypeTag> INT_TYPE_SET = new HashSet<>(Arrays.asList(INT_TYPES));
 
             @Override
@@ -135,7 +133,7 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
                         }
                         if (!INT_TYPE_SET.contains(tag2)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
-                                tag2.serialize());
+                                    tag2.serialize());
                         }
                         if (!INT_TYPE_SET.contains(tag3)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],

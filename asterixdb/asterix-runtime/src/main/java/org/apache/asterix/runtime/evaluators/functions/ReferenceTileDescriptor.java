@@ -18,7 +18,6 @@
  */
 package org.apache.asterix.runtime.evaluators.functions;
 
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -70,9 +69,8 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
         return new IScalarEvaluatorFactory() {
             private static final long serialVersionUID = 1L;
 
-            private final ATypeTag[] INT_TYPES =
-                new ATypeTag[] { ATypeTag.TINYINT, ATypeTag.SMALLINT, ATypeTag.INTEGER, ATypeTag.BIGINT,
-                                        ATypeTag.UINT8, ATypeTag.UINT16, ATypeTag.UINT32, ATypeTag.UINT64};
+            private final ATypeTag[] INT_TYPES = new ATypeTag[] { ATypeTag.TINYINT, ATypeTag.SMALLINT, ATypeTag.INTEGER,
+                    ATypeTag.BIGINT, ATypeTag.UINT8, ATypeTag.UINT16, ATypeTag.UINT32, ATypeTag.UINT64 };
             private final Set<ATypeTag> INT_TYPE_SET = new HashSet<>(Arrays.asList(INT_TYPES));
 
             @Override
@@ -97,7 +95,7 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
 
                     @SuppressWarnings("unchecked")
                     private ISerializerDeserializer intSerde =
-                        SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT32);
+                            SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT32);
 
                     @Override
                     public void evaluate(IFrameTupleReference tuple, IPointable result) throws HyracksDataException {
@@ -107,8 +105,8 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                         eval3.evaluate(tuple, inputArg3);
                         eval4.evaluate(tuple, inputArg4);
 
-                        if (PointableHelper.checkAndSetMissingOrNull(result, inputArg0, inputArg1, inputArg2,
-                                inputArg3, inputArg4)) {
+                        if (PointableHelper.checkAndSetMissingOrNull(result, inputArg0, inputArg1, inputArg2, inputArg3,
+                                inputArg4)) {
                             return;
                         }
 
