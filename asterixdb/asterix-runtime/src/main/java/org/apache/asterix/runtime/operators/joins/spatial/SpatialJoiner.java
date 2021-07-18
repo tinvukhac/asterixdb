@@ -53,6 +53,7 @@ public class SpatialJoiner {
 
     private SpatialSideTuple memoryTuple;
     private SpatialSideTuple[] inputTuple;
+    private TuplePointer tp;
 
     private final ISpatialJoinUtil mjc;
 
@@ -209,7 +210,7 @@ public class SpatialJoiner {
     }
 
     private boolean addToMemory(IFrameTupleAccessor accessor, int tupleId) throws HyracksDataException {
-        TuplePointer tp = new TuplePointer();
+        tp = new TuplePointer();
         if (bufferManager.insertTuple(accessor, tupleId, tp)) {
             memoryBuffer.add(tp);
             return true;
