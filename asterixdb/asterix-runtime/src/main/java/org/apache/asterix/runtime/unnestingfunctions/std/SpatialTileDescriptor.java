@@ -19,7 +19,10 @@
 package org.apache.asterix.runtime.unnestingfunctions.std;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.asterix.dataflow.data.nontagged.Coordinate;
 import org.apache.asterix.dataflow.data.nontagged.serde.ADoubleSerializerDeserializer;
@@ -33,6 +36,7 @@ import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
 import org.apache.asterix.om.types.ATypeTag;
 import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.EnumDeserializer;
+import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.exceptions.TypeMismatchException;
 import org.apache.asterix.runtime.unnestingfunctions.base.AbstractUnnestingFunctionDynamicDescriptor;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -69,6 +73,11 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
         return new IUnnestingEvaluatorFactory() {
 
             private static final long serialVersionUID = 1L;
+
+            private final ATypeTag[] INT_TYPES =
+                new ATypeTag[] { ATypeTag.TINYINT, ATypeTag.SMALLINT, ATypeTag.INTEGER, ATypeTag.BIGINT,
+                    ATypeTag.UINT8, ATypeTag.UINT16, ATypeTag.UINT32, ATypeTag.UINT64};
+            private final Set<ATypeTag> INT_TYPE_SET = new HashSet<>(Arrays.asList(INT_TYPES));
 
             @Override
             public IUnnestingEvaluator createUnnestingEvaluator(final IEvaluatorContext ctx)
@@ -124,13 +133,13 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
                                     ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
-                        if (tag2 != ATypeTag.BIGINT) {
+                        if (!INT_TYPE_SET.contains(tag2)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
-                                    ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                                tag2.serialize());
                         }
-                        if (tag3 != ATypeTag.BIGINT) {
+                        if (!INT_TYPE_SET.contains(tag3)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
-                                    ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                                    tag3.serialize());
                         }
 
                         double x1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
@@ -153,8 +162,8 @@ public class SpatialTileDescriptor extends AbstractUnnestingFunctionDynamicDescr
                         double maxY = ADoubleSerializerDeserializer.getDouble(bytes1, offset1 + 1
                                 + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
-                        int rows = (int) AInt64SerializerDeserializer.getLong(bytes2, offset2 + 1);
-                        int columns = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
+                        int rows = ATypeHierarchy.getIntegerValue(getIdentifier().getName(), 0, bytes2, offset2);
+                        int columns = ATypeHierarchy.getIntegerValue(getIdentifier().getName(), 0, bytes3, offset3);
 
                         // Unnest iff two input datasets overlap, which means partitioning MBR is not [(0,0),(0,0)]
                         tileValues.clear();

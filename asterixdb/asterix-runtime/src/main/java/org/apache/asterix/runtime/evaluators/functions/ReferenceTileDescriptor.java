@@ -144,11 +144,11 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                         }
                         if (!INT_TYPE_SET.contains(tag3)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
-                                    ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                                    tag3.serialize());
                         }
                         if (!INT_TYPE_SET.contains(tag4)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes4[offset4],
-                                    ATypeTag.SERIALIZED_INT64_TYPE_TAG);
+                                    tag4.serialize());
                         }
 
                         double ax1 = ADoubleSerializerDeserializer.getDouble(bytes0, offset0 + 1
