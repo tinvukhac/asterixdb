@@ -37,7 +37,7 @@ public class UnionMbrAggTypeComputer extends AggregateResultTypeComputer {
     protected IAType getResultType(ILogicalExpression expr, IAType... strippedInputTypes) throws AlgebricksException {
         ATypeTag typeTag = strippedInputTypes[0].getTypeTag();
         if (ILogicalBinaryComparator.inequalityUndefined(typeTag)) {
-            return BuiltinType.ANULL;
+            return BuiltinType.ARECTANGLE;
         }
         return typeTag == ATypeTag.ANY ? BuiltinType.ANY : AUnionType.createUnknownableType(strippedInputTypes[0]);
     }
