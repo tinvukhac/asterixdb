@@ -20,16 +20,22 @@ package org.apache.asterix.runtime.evaluators.functions;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.asterix.dataflow.data.nontagged.Coordinate;
 import org.apache.asterix.dataflow.data.nontagged.serde.ADoubleSerializerDeserializer;
-import org.apache.asterix.dataflow.data.nontagged.serde.AInt64SerializerDeserializer;
 import org.apache.asterix.dataflow.data.nontagged.serde.ARectangleSerializerDeserializer;
+import org.apache.asterix.formats.nontagged.SerializerDeserializerProvider;
+import org.apache.asterix.om.base.AMutableInt32;
 import org.apache.asterix.om.functions.BuiltinFunctions;
 import org.apache.asterix.om.functions.IFunctionDescriptor;
 import org.apache.asterix.om.functions.IFunctionDescriptorFactory;
 import org.apache.asterix.om.types.ATypeTag;
+import org.apache.asterix.om.types.BuiltinType;
 import org.apache.asterix.om.types.EnumDeserializer;
+import org.apache.asterix.om.types.hierachy.ATypeHierarchy;
 import org.apache.asterix.runtime.evaluators.base.AbstractScalarFunctionDynamicDescriptor;
 import org.apache.asterix.runtime.exceptions.TypeMismatchException;
 import org.apache.hyracks.algebricks.core.algebra.functions.FunctionIdentifier;
@@ -37,6 +43,7 @@ import org.apache.hyracks.algebricks.runtime.base.IEvaluatorContext;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluator;
 import org.apache.hyracks.algebricks.runtime.base.IScalarEvaluatorFactory;
 import org.apache.hyracks.api.context.IHyracksTaskContext;
+import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.data.std.api.IPointable;
 import org.apache.hyracks.data.std.primitive.VoidPointable;
@@ -63,6 +70,11 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
         return new IScalarEvaluatorFactory() {
             private static final long serialVersionUID = 1L;
 
+            private final ATypeTag[] INT_TYPES =
+                new ATypeTag[] { ATypeTag.TINYINT, ATypeTag.SMALLINT, ATypeTag.INTEGER, ATypeTag.BIGINT,
+                                        ATypeTag.UINT8, ATypeTag.UINT16, ATypeTag.UINT32, ATypeTag.UINT64};
+            private final Set<ATypeTag> INT_TYPE_SET = new HashSet<>(Arrays.asList(INT_TYPES));
+
             @Override
             public IScalarEvaluator createScalarEvaluator(final IEvaluatorContext ctx) throws HyracksDataException {
                 final IHyracksTaskContext hyracksTaskContext = ctx.getTaskContext();
@@ -70,7 +82,6 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                 return new IScalarEvaluator() {
 
                     private final ArrayBackedValueStorage resultStorage = new ArrayBackedValueStorage();
-                    private final DataOutput out = resultStorage.getDataOutput();
                     private final IPointable inputArg0 = new VoidPointable();
                     private final IPointable inputArg1 = new VoidPointable();
                     private final IPointable inputArg2 = new VoidPointable();
@@ -82,10 +93,14 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                     private final IScalarEvaluator eval3 = args[3].createScalarEvaluator(ctx);
                     private final IScalarEvaluator eval4 = args[4].createScalarEvaluator(ctx);
 
+                    private AMutableInt32 aInt32 = new AMutableInt32(0);
+
+                    @SuppressWarnings("unchecked")
+                    private ISerializerDeserializer intSerde =
+                        SerializerDeserializerProvider.INSTANCE.getSerializerDeserializer(BuiltinType.AINT32);
+
                     @Override
                     public void evaluate(IFrameTupleReference tuple, IPointable result) throws HyracksDataException {
-                        resultStorage.reset();
-
                         eval0.evaluate(tuple, inputArg0);
                         eval1.evaluate(tuple, inputArg1);
                         eval2.evaluate(tuple, inputArg2);
@@ -93,11 +108,7 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                         eval4.evaluate(tuple, inputArg4);
 
                         if (PointableHelper.checkAndSetMissingOrNull(result, inputArg0, inputArg1, inputArg2,
-                                inputArg3)) {
-                            return;
-                        }
-
-                        if (PointableHelper.checkAndSetMissingOrNull(result, inputArg4)) {
+                                inputArg3, inputArg4)) {
                             return;
                         }
 
@@ -131,11 +142,11 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes2[offset2],
                                     ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
-                        if (tag3 != ATypeTag.BIGINT) {
+                        if (!INT_TYPE_SET.contains(tag3)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes3[offset3],
                                     ATypeTag.SERIALIZED_INT64_TYPE_TAG);
                         }
-                        if (tag4 != ATypeTag.BIGINT) {
+                        if (!INT_TYPE_SET.contains(tag4)) {
                             throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes4[offset4],
                                     ATypeTag.SERIALIZED_INT64_TYPE_TAG);
                         }
@@ -160,8 +171,8 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
                         double maxY = ADoubleSerializerDeserializer.getDouble(bytes2, offset2 + 1
                                 + ARectangleSerializerDeserializer.getUpperRightCoordinateOffset(Coordinate.Y));
 
-                        int rows = (int) AInt64SerializerDeserializer.getLong(bytes3, offset3 + 1);
-                        int columns = (int) AInt64SerializerDeserializer.getLong(bytes4, offset4 + 1);
+                        int rows = ATypeHierarchy.getIntegerValue(getIdentifier().getName(), 0, bytes3, offset3);
+                        int columns = ATypeHierarchy.getIntegerValue(getIdentifier().getName(), 0, bytes4, offset4);
 
                         // Compute the reference point
                         double x = Math.max(ax1, bx1);
@@ -176,10 +187,10 @@ public class ReferenceTileDescriptor extends AbstractScalarFunctionDynamicDescri
 
                         int tileId = (row - 1) * columns + col;
                         try {
-                            out.writeByte(ATypeTag.SERIALIZED_INT32_TYPE_TAG);
-                            out.writeInt(tileId);
+                            resultStorage.reset();
+                            aInt32.setValue(tileId);
+                            intSerde.serialize(aInt32, resultStorage.getDataOutput());
                         } catch (IOException e) {
-                            e.printStackTrace();
                             throw HyracksDataException.create(e);
                         }
                         result.set(resultStorage);

@@ -104,7 +104,7 @@ public class GetIntersectionDescriptor extends AbstractScalarFunctionDynamicDesc
                                     ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
                         if (tag1 != ATypeTag.RECTANGLE) {
-                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 0, bytes1[offset1],
+                            throw new TypeMismatchException(sourceLoc, getIdentifier(), 1, bytes1[offset1],
                                     ATypeTag.SERIALIZED_RECTANGLE_TYPE_TAG);
                         }
 

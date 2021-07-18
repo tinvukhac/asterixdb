@@ -81,9 +81,8 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
         int len = inputVal.getLength();
         ATypeTag typeTag =
                 EnumDeserializer.ATYPETAGDESERIALIZER.deserialize(inputVal.getByteArray()[inputVal.getStartOffset()]);
-        // Ignore SYSTEM_NULL.
         if (typeTag == ATypeTag.NULL || typeTag == ATypeTag.MISSING) {
-            processNull();
+            processNull(typeTag);
         } else if (typeTag == ATypeTag.RECTANGLE) {
             DataInput dataIn = new DataInputStream(new ByteArrayInputStream(data, offset + 1, len - 1));
             ARectangle rect = ARectangleSerializerDeserializer.INSTANCE.deserialize(dataIn);
@@ -114,9 +113,8 @@ public abstract class AbstractUnionMbrAggregateFunction extends AbstractAggregat
         }
     }
 
-    protected void processNull() throws UnsupportedItemTypeException {
-        throw new UnsupportedItemTypeException(sourceLoc, BuiltinFunctions.UNION_MBR,
-                ATypeTag.SERIALIZED_SYSTEM_NULL_TYPE_TAG);
+    protected void processNull(ATypeTag typeTag) throws UnsupportedItemTypeException {
+        throw new UnsupportedItemTypeException(sourceLoc, BuiltinFunctions.UNION_MBR, typeTag.serialize());
     }
 
     private boolean isValidCoordinates(double minX, double minY, double maxX, double maxY) {
