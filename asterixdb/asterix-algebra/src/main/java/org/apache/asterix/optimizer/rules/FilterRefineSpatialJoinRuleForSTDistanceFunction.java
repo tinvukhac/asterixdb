@@ -47,78 +47,16 @@ import org.apache.hyracks.algebricks.core.rewriter.base.IAlgebraicRewriteRule;
  * SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
  * WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) &#42;/ st_distance(ps.geom,ls.geom) < 100.5;
  *
- * -- DISTRIBUTE_RESULT  |UNPARTITIONED|
- *   -- ONE_TO_ONE_EXCHANGE  |UNPARTITIONED|
- *     -- STREAM_PROJECT  |UNPARTITIONED|
- *       -- ASSIGN  |UNPARTITIONED|
- *         -- AGGREGATE  |UNPARTITIONED|
- *           -- RANDOM_MERGE_EXCHANGE  |PARTITIONED|
- *             -- AGGREGATE  |PARTITIONED|
- *               -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                 -- NESTED_LOOP  |PARTITIONED|
- *                   -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                     -- STREAM_PROJECT  |PARTITIONED|
- *                       -- ASSIGN  |PARTITIONED|
- *                         -- STREAM_PROJECT  |PARTITIONED|
- *                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                             -- DATASOURCE_SCAN  |PARTITIONED|
- *                               -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                                 -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
- *                   -- BROADCAST_EXCHANGE  |PARTITIONED|
- *                     -- STREAM_PROJECT  |PARTITIONED|
- *                       -- ASSIGN  |PARTITIONED|
- *                         -- STREAM_PROJECT  |PARTITIONED|
- *                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                             -- DATASOURCE_SCAN  |PARTITIONED|
- *                               -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                                 -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
- *
  * Becomes,
  *
  * SELECT COUNT(*) FROM ParkSet AS ps, LakeSet AS ls
  * WHERE /*+ spatial-partitioning(-180.0, -83.0, 180.0, 90.0, 10, 10) &#42;/
  * spatial_intersect(st_mbr_offset(ps.geom, 100.5),st_mbr(ls.geom)) and st_distance(ps.geom,ls.geom) < 100.5;
  *
- * -- DISTRIBUTE_RESULT  |UNPARTITIONED|
- *   -- ONE_TO_ONE_EXCHANGE  |UNPARTITIONED|
- *     -- STREAM_PROJECT  |UNPARTITIONED|
- *       -- ASSIGN  |UNPARTITIONED|
- *         -- AGGREGATE  |UNPARTITIONED|
- *           -- RANDOM_MERGE_EXCHANGE  |PARTITIONED|
- *             -- AGGREGATE  |PARTITIONED|
- *               -- STREAM_SELECT  |PARTITIONED|
- *                 -- STREAM_PROJECT  |PARTITIONED|
- *                   -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                     -- SPATIAL_JOIN [$$61, $$56] [$$62, $$57]  |PARTITIONED|
- *                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                         -- STABLE_SORT [$$61(ASC), $$56(ASC)]  |PARTITIONED|
- *                           -- HASH_PARTITION_EXCHANGE [$$61]  |PARTITIONED|
- *                             -- UNNEST  |PARTITIONED|
- *                               -- ASSIGN  |PARTITIONED|
- *                                 -- STREAM_PROJECT  |PARTITIONED|
- *                                   -- ASSIGN  |PARTITIONED|
- *                                     -- STREAM_PROJECT  |PARTITIONED|
- *                                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                                         -- DATASOURCE_SCAN  |PARTITIONED|
- *                                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                                             -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
- *                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                         -- STABLE_SORT [$$62(ASC), $$57(ASC)]  |PARTITIONED|
- *                           -- HASH_PARTITION_EXCHANGE [$$62]  |PARTITIONED|
- *                             -- UNNEST  |PARTITIONED|
- *                               -- ASSIGN  |PARTITIONED|
- *                                 -- STREAM_PROJECT  |PARTITIONED|
- *                                   -- ASSIGN  |PARTITIONED|
- *                                     -- STREAM_PROJECT  |PARTITIONED|
- *                                       -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                                         -- DATASOURCE_SCAN  |PARTITIONED|
- *                                           -- ONE_TO_ONE_EXCHANGE  |PARTITIONED|
- *                                             -- EMPTY_TUPLE_SOURCE  |PARTITIONED|
- *
  * st_mbr() computes the mbr of a Geometry, and st_mbr_offset() computes the mbr of a Geometry and extending
  * by the second parameter.
  *
- * The /*+ spatial-partitioning x1 y1 x2 y2 row col &#42;/ annotation allows users to define the MBR and
+ * The /*+ spatial-partitioning(x1, y1, x2, y2, row, col) &#42;/ annotation allows users to define the MBR and
  * grid size (row,col) and these are used for partitioning. If the query does not have an annotation, the MBR is
  * computed dynamically and grid size set to 100 100.
  */
