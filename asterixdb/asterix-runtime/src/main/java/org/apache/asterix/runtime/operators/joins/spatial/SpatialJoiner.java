@@ -156,11 +156,9 @@ public class SpatialJoiner {
     private void processBuildTuple(IFrameWriter writer) throws HyracksDataException {
         // Check against memory
         if (memoryHasTuples()) {
-            inputTuple[BUILD_PARTITION].loadTuple();
             memoryCursor.reset(memoryBuffer.iterator());
             while (memoryCursor.hasNext()) {
                 memoryCursor.next();
-                memoryTuple.loadTuple();
                 if (inputTuple[BUILD_PARTITION].removeFromMemory(memoryTuple)) {
                     // remove from memory
                     bufferManager.deleteTuple(memoryCursor.getTuplePointer());

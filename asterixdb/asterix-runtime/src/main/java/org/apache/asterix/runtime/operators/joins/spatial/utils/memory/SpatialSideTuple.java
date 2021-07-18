@@ -36,10 +36,6 @@ public class SpatialSideTuple {
         this.fieldId = fieldId;
     }
 
-    public void loadTuple() {
-
-    }
-
     public int getTupleIndex() {
         return cursor.getTupleId();
     }
