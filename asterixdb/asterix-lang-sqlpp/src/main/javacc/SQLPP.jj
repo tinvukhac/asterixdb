@@ -398,6 +398,19 @@ class SQLPPParser extends ScopeChecker implements IParser {
         return new SQLPPParser(text).parseParenthesizedIdentifierList();
     }
 
+    private List<Expression> parseParenthesizedLiteralList() throws CompilationException {
+        return parseImpl(new ParseFunction<List<Expression>>() {
+            @Override
+            public  List<Expression> parse() throws ParseException {
+                return SQLPPParser.this.ParenthesizedLiteralList();
+            }
+        });
+    }
+
+    private static List<Expression> parseParenthesizedLiteralList(String text) throws CompilationException {
+        return new SQLPPParser(text).parseParenthesizedLiteralList();
+    }
+
     @Override
     public FunctionDecl parseFunctionBody(FunctionSignature signature, List<String> paramNames, boolean isStored)
       throws CompilationException {
@@ -653,26 +666,38 @@ class SQLPPParser extends ScopeChecker implements IParser {
               return SkipSecondaryIndexSearchExpressionAnnotation.newInstance(indexNames);
             }
           case SPATIAL_JOIN_HINT:
-            String[] splits = hintToken.hintParams != null ? hintToken.hintParams.replaceAll("[\\(\\)\\s]", "").split(",") : null;
-            try {
-              double minX = Double.parseDouble(splits[0]);
-              double minY = Double.parseDouble(splits[1]);
-              double maxX = Double.parseDouble(splits[2]);
-              double maxY = Double.parseDouble(splits[3]);
-              int numRows = Integer.parseInt(splits[4]);
-              int numColumns = Integer.parseInt(splits[5]);
-              SpatialJoinAnnotation spatialJoinAnn = new SpatialJoinAnnotation(minX, minY, maxX, maxY, numRows, numColumns);
-              return spatialJoinAnn;
-            } catch (NullPointerException e) {
-                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. %s: %s",
-                                    hintToken.hint.toString(), e.getClass().getName(), e.getMessage()));
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. %s: %s",
-                                    hintToken.hint.toString(), e.getClass().getName(), e.getMessage()));
-            } catch (NumberFormatException e) {
-                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. %s: %s",
-                                    hintToken.hint.toString(), e.getClass().getName(), e.getMessage()));
+            List<Expression> hintValues = parseParenthesizedLiteralList(hintToken.hintParams);
+
+            // Handle exceptions
+            if (hintValues.size() != 6) {
+              throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. 6 arguments are required.",
+                                hintToken.hint.toString()));
             }
+
+            for (int i = 0; i < 4; i++) {
+              LiteralExpr lit = (LiteralExpr) hintValues.get(i);
+              if ((lit.getValue().getLiteralType() != Literal.Type.DOUBLE) && (lit.getValue().getLiteralType() != Literal.Type.FLOAT)) {
+                throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. Double is required for first 4 arguments.",
+                                hintToken.hint.toString()));
+              }
+            }
+
+            for (int i = 4; i < 6; i++) {
+              LiteralExpr lit = (LiteralExpr) hintValues.get(i);
+                if (lit.getValue().getLiteralType() != Literal.Type.LONG) {
+                  throw new SqlppParseException(getSourceLocation(hintToken), String.format("Unexpected hint: %s. Long is required for last 2 arguments.",
+                                hintToken.hint.toString()));
+              }
+            }
+
+            double minX = (Double) ((LiteralExpr) hintValues.get(0)).getValue().getValue();
+            double minY = (Double) ((LiteralExpr) hintValues.get(1)).getValue().getValue();
+            double maxX = (Double) ((LiteralExpr) hintValues.get(2)).getValue().getValue();
+            double maxY = (Double) ((LiteralExpr) hintValues.get(3)).getValue().getValue();
+            int numRows = ((Long) ((LiteralExpr) hintValues.get(4)).getValue().getValue()).intValue();
+            int numColumns = ((Long) ((LiteralExpr) hintValues.get(5)).getValue().getValue()).intValue();
+            SpatialJoinAnnotation spatialJoinAnn = new SpatialJoinAnnotation(minX, minY, maxX, maxY, numRows, numColumns);
+            return spatialJoinAnn;
           case USE_SECONDARY_INDEX_SEARCH_HINT:
             if (hintToken.hintParams == null) {
               throw new SqlppParseException(getSourceLocation(hintToken), "Expected index name(s)");
@@ -2921,6 +2946,21 @@ List<String> ParenthesizedIdentifierList() throws ParseException:
   <LEFTPAREN>
   ident = Identifier() { list.add(ident); }
   ( <COMMA> ident = Identifier() { list.add(ident); } )*
+  <RIGHTPAREN>
+  {
+    return list;
+  }
+}
+
+List<Expression> ParenthesizedLiteralList() throws ParseException:
+{
+  List<Expression> list = new ArrayList<Expression>();
+  Expression ident = null;
+}
+{
+  <LEFTPAREN>
+  ident = Literal() { list.add(ident); }
+  ( <COMMA> ident = Literal() { list.add(ident); } )*
   <RIGHTPAREN>
   {
     return list;
@@ -5219,14 +5259,15 @@ TOKEN :
 <DEFAULT,IN_DBL_BRACE>
 TOKEN:
 {
-    <INTEGER_LITERAL : <DIGITS> >
-  | <DOUBLE_LITERAL: <DIGITS> ( "." <DIGITS> ) (("e"|"E") ("+"|"-")? <DIGITS>)?
-                      | <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)
-                      | "." <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)?
+    <INTEGER_LITERAL : ("+"|"-")? <DIGITS> >
+  | <DOUBLE_LITERAL: ("+"|"-")? <DIGITS> ( "." <DIGITS> ) (("e"|"E") ("+"|"-")? <DIGITS>)?
+                      | ("+"|"-")? <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)
+                      | ("+"|"-")? "." <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)?
+                      | ("+"|"-")? <DIGITS> ( "." <DIGITS> )
     >
-  | <FLOAT_LITERAL:  <DIGITS> ( "f" | "F" )
-                      | <DIGITS> ( "." <DIGITS> ( "f" | "F" ) )?
-                      | "." <DIGITS> ( "f" | "F" )
+  | <FLOAT_LITERAL:  ("+"|"-")? <DIGITS> ( "f" | "F" )
+                      | ("+"|"-")? <DIGITS> ( "." <DIGITS> ( "f" | "F" ) )?
+                      | ("+"|"-")? "." <DIGITS> ( "f" | "F" )
     >
   | <#DIGITS : (<DIGIT>)+ >
 }

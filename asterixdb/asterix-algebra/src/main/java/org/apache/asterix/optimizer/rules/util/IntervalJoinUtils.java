@@ -101,19 +101,18 @@ public class IntervalJoinUtils {
 
         //Check RangeMap type
         RangeMap rangeMap = rangeAnnotation.getRangeMap();
-        if (rangeMap.getTag(0, 0) != ATypeTag.DATETIME.serialize()
-            && rangeMap.getTag(0, 0) != ATypeTag.DATE.serialize()
-            && rangeMap.getTag(0, 0) != ATypeTag.TIME.serialize()) {
+        if (rangeMap.getTag(0, 0) != ATypeTag.DATETIME.serialize() && rangeMap.getTag(0, 0) != ATypeTag.DATE.serialize()
+                && rangeMap.getTag(0, 0) != ATypeTag.TIME.serialize()) {
             IWarningCollector warningCollector = context.getWarningCollector();
             if (warningCollector.shouldWarn()) {
                 warningCollector.warn(Warning.of(op.getSourceLocation(),
-                    org.apache.hyracks.api.exceptions.ErrorCode.INAPPLICABLE_HINT,
-                    "Date, DateTime, and Time are only range hints types supported for interval joins"));
+                        org.apache.hyracks.api.exceptions.ErrorCode.INAPPLICABLE_HINT,
+                        "Date, DateTime, and Time are only range hints types supported for interval joins"));
             }
             return false;
         }
-        IntervalPartitions intervalPartitions = IntervalJoinUtils.createIntervalPartitions(op, fi, sideLeft,
-            sideRight, rangeMap, context, left, right);
+        IntervalPartitions intervalPartitions =
+                IntervalJoinUtils.createIntervalPartitions(op, fi, sideLeft, sideRight, rangeMap, context, left, right);
         IntervalJoinUtils.setSortMergeIntervalJoinOp(op, fi, sideLeft, sideRight, context, intervalPartitions);
         return true;
     }

@@ -68,9 +68,10 @@ public abstract class AbstractSTGeometryDoubleNDescriptor extends AbstractScalar
 
     private class AbstractSTGeometryDoubleNEvaluator implements IScalarEvaluator {
 
-        private final Byte[] NUMERIC_TYPES = new Byte[] { ATypeTag.SERIALIZED_INT8_TYPE_TAG,
-            ATypeTag.SERIALIZED_INT16_TYPE_TAG, ATypeTag.SERIALIZED_INT32_TYPE_TAG, ATypeTag.SERIALIZED_INT64_TYPE_TAG,
-            ATypeTag.SERIALIZED_FLOAT_TYPE_TAG, ATypeTag.SERIALIZED_DOUBLE_TYPE_TAG };
+        private final Byte[] NUMERIC_TYPES =
+                new Byte[] { ATypeTag.SERIALIZED_INT8_TYPE_TAG, ATypeTag.SERIALIZED_INT16_TYPE_TAG,
+                        ATypeTag.SERIALIZED_INT32_TYPE_TAG, ATypeTag.SERIALIZED_INT64_TYPE_TAG,
+                        ATypeTag.SERIALIZED_FLOAT_TYPE_TAG, ATypeTag.SERIALIZED_DOUBLE_TYPE_TAG };
         private final Set<Byte> NUMERIC_TYPE_SET = new HashSet<>(Arrays.asList(NUMERIC_TYPES));
 
         private ArrayBackedValueStorage resultStorage;
