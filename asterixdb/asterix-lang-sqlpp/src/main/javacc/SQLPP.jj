@@ -2955,12 +2955,48 @@ List<String> ParenthesizedIdentifierList() throws ParseException:
 List<Expression> ParenthesizedLiteralList() throws ParseException:
 {
   List<Expression> list = new ArrayList<Expression>();
+  boolean minus = false;
   Expression ident = null;
+  DoubleLiteral dLit = null;
 }
 {
   <LEFTPAREN>
-  ident = Literal() { list.add(ident); }
-  ( <COMMA> ident = Literal() { list.add(ident); } )*
+  (<MINUS> { minus = true; })? ident = Literal()
+  {
+    if (minus)
+    {
+      if (((LiteralExpr)ident).getValue().getLiteralType() == Literal.Type.DOUBLE)
+      {
+        dLit = (DoubleLiteral)((LiteralExpr)ident).getValue();
+        dLit.setValue(-dLit.getValue());
+        ident = (Expression) (new LiteralExpr(dLit));
+        list.add(ident);
+      }
+      minus = false;
+    }
+    else
+    {
+      list.add(ident);
+    }
+  }
+  ( <COMMA> (<MINUS> { minus = true; })? ident = Literal()
+  {
+    if (minus)
+    {
+      if (((LiteralExpr)ident).getValue().getLiteralType() == Literal.Type.DOUBLE)
+      {
+        dLit = (DoubleLiteral)((LiteralExpr)ident).getValue();
+        dLit.setValue(-dLit.getValue());
+        ident = (Expression) (new LiteralExpr(dLit));
+        list.add(ident);
+      }
+      minus = false;
+    }
+    else
+    {
+      list.add(ident);
+    }
+  } )*
   <RIGHTPAREN>
   {
     return list;
@@ -5259,15 +5295,14 @@ TOKEN :
 <DEFAULT,IN_DBL_BRACE>
 TOKEN:
 {
-    <INTEGER_LITERAL : ("+"|"-")? <DIGITS> >
-  | <DOUBLE_LITERAL: ("+"|"-")? <DIGITS> ( "." <DIGITS> ) (("e"|"E") ("+"|"-")? <DIGITS>)?
-                      | ("+"|"-")? <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)
-                      | ("+"|"-")? "." <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)?
-                      | ("+"|"-")? <DIGITS> ( "." <DIGITS> )
+    <INTEGER_LITERAL : <DIGITS> >
+  | <DOUBLE_LITERAL: <DIGITS> ( "." <DIGITS> ) (("e"|"E") ("+"|"-")? <DIGITS>)?
+                      | <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)
+                      | "." <DIGITS> (("e"|"E") ("+"|"-")? <DIGITS>)?
     >
-  | <FLOAT_LITERAL:  ("+"|"-")? <DIGITS> ( "f" | "F" )
-                      | ("+"|"-")? <DIGITS> ( "." <DIGITS> ( "f" | "F" ) )?
-                      | ("+"|"-")? "." <DIGITS> ( "f" | "F" )
+  | <FLOAT_LITERAL:  <DIGITS> ( "f" | "F" )
+                      | <DIGITS> ( "." <DIGITS> ( "f" | "F" ) )?
+                      | "." <DIGITS> ( "f" | "F" )
     >
   | <#DIGITS : (<DIGIT>)+ >
 }
