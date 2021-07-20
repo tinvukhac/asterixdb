@@ -2958,6 +2958,7 @@ List<Expression> ParenthesizedLiteralList() throws ParseException:
   boolean minus = false;
   Expression ident = null;
   DoubleLiteral dLit = null;
+  IntegerLiteral iLit = null;
 }
 {
   <LEFTPAREN>
@@ -2969,7 +2970,14 @@ List<Expression> ParenthesizedLiteralList() throws ParseException:
       {
         dLit = (DoubleLiteral)((LiteralExpr)ident).getValue();
         dLit.setValue(-dLit.getValue());
-        ident = (Expression) (new LiteralExpr(dLit));
+        ident = new LiteralExpr(dLit);
+        list.add(ident);
+      }
+      if (((LiteralExpr)ident).getValue().getLiteralType() == Literal.Type.INTEGER)
+      {
+        iLit = (IntegerLiteral)((LiteralExpr)ident).getValue();
+        iLit.setValue(-iLit.getValue());
+        ident = new LiteralExpr(iLit);
         list.add(ident);
       }
       minus = false;
@@ -2987,7 +2995,14 @@ List<Expression> ParenthesizedLiteralList() throws ParseException:
       {
         dLit = (DoubleLiteral)((LiteralExpr)ident).getValue();
         dLit.setValue(-dLit.getValue());
-        ident = (Expression) (new LiteralExpr(dLit));
+        ident = new LiteralExpr(dLit);
+        list.add(ident);
+      }
+      if (((LiteralExpr)ident).getValue().getLiteralType() == Literal.Type.INTEGER)
+      {
+        iLit = (IntegerLiteral)((LiteralExpr)ident).getValue();
+        iLit.setValue(-iLit.getValue());
+        ident = new LiteralExpr(iLit);
         list.add(ident);
       }
       minus = false;
